@@ -1,9 +1,9 @@
-from src.data.download import download_ag_news
+from src.data.data import AGNews
 
 
 def main():
     # Ensure the AG News dataset is downloaded and saved as CSV files
-    download_ag_news()
+    ds = AGNews(path="data/ag_news")
 
 
 if __name__ == "__main__":
