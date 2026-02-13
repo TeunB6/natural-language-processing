@@ -1,6 +1,9 @@
 from pathlib import Path
+from rich.console import Console
 
 ROOT_DIR = Path(__file__).parent.parent
 RANDOM_SEED = 33
 DATA_DIR = ROOT_DIR / Path("data/ag_news")
-DEBUG = True
+MODEL_DIR = ROOT_DIR / Path("models")
+DEBUG = False # Set to True to enable debug prints throughout the code
+CONSOLE = Console() # Global console object for rich printing throughout the code
