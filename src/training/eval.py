@@ -4,22 +4,26 @@ from src.data.data import AGNews
 
 # Visualization
 from rich.table import Table
+from rich.panel import Panel
 
 from src.const import CONSOLE
 
-def evaluate_model(model: BaseEstimator, ds: AGNews):
+def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
     """Evaluate a trained model on the dev set and display results."""
     # Predict on the dev set
-    y_pred = model.predict(ds.X_dev)
+    X, y = ds.X_dev, ds.y_dev if not use_test else (ds.X_test, ds.y_test)
+    
+    y_pred = model.predict(X)
 
     # Display initial metrics in a table
-    table = Table(title=f"{model.__class__.__name__} Results on Dev Set")
+    CONSOLE.print(Panel(f"{model.__class__.__name__} Results on {"Test" if use_test else "Dev"} Set", style="bold yellow"))
+    table = Table(title="Evaluation Metrics")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="magenta")
-    table.add_row("Accuracy", f"{accuracy_score(ds.y_dev, y_pred):.4f}")
-    table.add_row("F1 Score (weighted)", f"{f1_score(ds.y_dev, y_pred, average='weighted'):.4f}")
+    table.add_row("Accuracy", f"{accuracy_score(y, y_pred):.4f}")
+    table.add_row("F1 Score (weighted)", f"{f1_score(y, y_pred, average='weighted'):.4f}")
     CONSOLE.print(table)
-    cm = confusion_matrix(ds.y_dev, y_pred)
+    cm = confusion_matrix(y, y_pred)
     
     # Make Confusion Matrix more readable by mapping label indices to class names
     label_mapping = ds.label_mapping
