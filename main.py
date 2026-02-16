@@ -10,7 +10,9 @@ from sklearn.svm import SVC
 # Visualization
 from rich.panel import Panel
 from rich.progress import track
-from src.const import CONSOLE
+from src.const import CONSOLE, RESULTS_DIR
+from src.utils.ui import cli_menu
+
 
 RETRAIN_MODEL = False  # Set to True to retrain models every time, False to load from disk if available
 
@@ -40,21 +42,15 @@ def main():
     # Ensure the AG News dataset is downloaded and saved as CSV files
     ds = AGNews(path="data/ag_news")
     
-    # Run CLI menu
     CONSOLE.print(Panel("AG News NLP Pipeline", style="bold blue"))
-    CONSOLE.print("\n[bold]Available Assignments:[/bold]")
-    CONSOLE.print("1. Assignment 1 - Dataset Showcase & Baseline Models")
-    CONSOLE.print("2. Exit")
-
-    choice = CONSOLE.input("\n[bold cyan]Enter your choice (1-2):[/bold cyan] ").strip()
-
-    if choice == "1":
-        assignment1_showcase(ds)
-    elif choice == "2":
-        CONSOLE.print("[bold yellow]Exiting...[/bold yellow]")
-    else:
-        CONSOLE.print("[bold red]Invalid choice. Please try again.[/bold red]")
-        
+    cli_menu(
+        "Select an assignment to showcase different functionalities:",
+        {
+            "Assignment 1 - Dataset Showcase & Baseline Models": lambda: assignment1_showcase(ds),
+            "Exit": lambda: CONSOLE.print("[bold yellow]Exiting...[/bold yellow]")
+            # Future assignments can be added here
+        },
+    )        
 
 if __name__ == "__main__":
     main()
