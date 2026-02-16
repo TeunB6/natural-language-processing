@@ -1,6 +1,9 @@
 # datasets
 data/*
 
+# habrok: ignore habrok folder with slurm scripts and out files
+habrok/*
+
 # models
 models/*
 
