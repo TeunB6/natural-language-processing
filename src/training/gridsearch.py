@@ -1,7 +1,7 @@
 from pathlib import Path
 import pickle as pkl
 from sklearn.svm import SVC
-from sklearn.model_selection import GridSearchCV, ParameterGrid
+from sklearn.model_selection import GridSearchCV
 
 from src.data.data import AGNews
 from datetime import datetime
@@ -29,9 +29,6 @@ def svm_gridsearch(data: AGNews, param_grid = {}, eval: bool = True) -> None:
     
     grid_search.fit(data.X_train, data.y_train)
     
-    grid_search.best_index_
-    
-
     out_path = RESULTS_DIR / f"svm_gridsearch_results_{datetime.now().isoformat()}.csv"
     results = grid_search.cv_results_
     with open(out_path, "w") as f:
