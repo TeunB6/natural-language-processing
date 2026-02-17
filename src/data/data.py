@@ -66,13 +66,8 @@ class AGNews:
             print("y_dev shape:", self.y_dev.shape)
             print("X_test shape:", self.X_test.shape)
             print("y_test shape:", self.y_test.shape)
-    
+
     @property
     def label_mapping(self):
         """Return a mapping of label indices to class names."""
-        return {
-            1: "World",
-            2: "Sports",
-            3: "Business",
-            4: "Sci/Tech"
-        }
+        return {1: "World", 2: "Sports", 3: "Business", 4: "Sci/Tech"}
