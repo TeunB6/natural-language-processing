@@ -79,5 +79,6 @@ def analyze_model_errors(
         ds=ds,
         split=split,
         min_examples=min_examples,
-        show_hardest=show_hardest,
+        wrap_width=80,
+        show_full_text=True,
     )
