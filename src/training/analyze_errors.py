@@ -147,15 +147,16 @@ class ErrorAnalyzer:
             "error_types": len(self.misclassifications),
         }
 
-    def display_summary(self) -> None:
+    def display_summary(self, split: str = "dev") -> None:
         """Display error summary in a panel."""
         s = self.error_stats
+        split_name = split.upper()
         panel = Panel(
             f"[bold cyan]Total Samples:[/][white] {s['total_samples']}[/]\n"
             f"[bold red]Total Errors:[/][white] {s['total_errors']}[/]\n"
             f"[bold yellow]Error Rate:[/][white] {s['error_rate']:.2%}[/]\n"
             f"[bold green]Accuracy:[/][white] {s['accuracy']:.2%}[/]",
-            title=f"{self.model.__class__.__name__} Error Summary",
+            title=f"{self.model.__class__.__name__} Error Summary ({split_name})",
         )
 
         self.console.print(panel)

@@ -15,7 +15,7 @@ class ErrorAnalysisPipeline:
         self,
         model: Any,
         ds: AGNews,
-        split: str = "dev",
+        split: str = "test",
         min_examples: int = 10,
         wrap_width: int = 80,
         show_full_text: bool = True,
@@ -39,7 +39,7 @@ class ErrorAnalysisPipeline:
         )
 
         analyzer.analyze(split=split)
-        analyzer.display_summary()
+        analyzer.display_summary(split=split)
         analyzer.display_error_matrix()
 
         for (pred, actual), examples in sorted(
