@@ -7,7 +7,7 @@ from typing import Optional
 from rich.table import Table
 from rich.panel import Panel
 
-from src.const import CONSOLE
+from src.const import CONSOLE, DEBUG
 from src.utils.error_analysis_pipeline import ErrorAnalysisPipeline
 
 
@@ -22,7 +22,7 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
         min_error_examples: Minimum examples per error type to show
     """
     # Predict on the dev set
-    X, y = ds.X_dev, ds.y_dev if not use_test else (ds.X_test, ds.y_test)
+    X, y = (ds.X_dev, ds.y_dev) if not use_test else (ds.X_test, ds.y_test)
 
     y_pred = model.predict(X)
 
@@ -30,9 +30,13 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
     CONSOLE.print(
         Panel(
             f"{model.__class__.__name__} Results on {"Test" if use_test else "Dev"} Set",
-            style="bold yellow",
+            style="bold green",
         )
     )
+    
+    if DEBUG:
+        print(y_pred.shape, y.shape, X.shape)    
+    
     table = Table(title="Evaluation Metrics")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="magenta")

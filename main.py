@@ -22,22 +22,32 @@ def assignment1_showcase(ds: AGNews, choice: int = None):
 
     def train_and_evaluate():
         # Train a simple logistic regression model
-        CONSOLE.print(Panel(f"Logistic Regression Model", style="bold green"))
+              
         if RETRAIN_MODEL:
+            CONSOLE.print(Panel(f"Training: Logistic Regression Model...", style="bold yellow"))
             logreg_model = train_model(LogisticRegression(max_iter=1000), ds)
         else:
             logreg_model = get_model(LogisticRegression(max_iter=1000), ds)
-        evaluate_model(logreg_model, ds)
-
+        
         # Train SVM model
-        CONSOLE.print(Panel("Linear SVM Model", style="bold green"))
         if RETRAIN_MODEL:
-            svm_model = train_model(SVC(kernel="linear", max_iter=1000), ds)
+            CONSOLE.print(Panel(f"Training: SVM...", style="bold yellow"))
+            svm_model = train_model(SVC(kernel="linear", C=0.1), ds)
         else:
-            svm_model = get_model(SVC(kernel="linear", max_iter=1000), ds)
-        evaluate_model(svm_model, ds)
+            svm_model = get_model(SVC(kernel="linear", C=0.1), ds)
+
+        
+        # Evaluate both models on the set
+        cli_menu("Evaluate on which set?", 
+                 {"Dev Set":
+                     lambda: (evaluate_model(logreg_model, ds), evaluate_model(svm_model, ds)),
+                  "Test Set":
+                      lambda: (evaluate_model(logreg_model, ds, use_test=True), evaluate_model(svm_model, ds, use_test=True)),
+                  "Back to Menu": lambda: None}
+                 )
 
     def grid_search():
+        CONSOLE.print(Panel("WARNING: Running SVM Grid Search can take a long time.", style="bold red"))
         param_grid = {"C": np.logspace(-3, 3, 7), "kernel": ["linear"]}
         svm_gridsearch(ds, param_grid, RESULTS_DIR)
 
@@ -46,7 +56,7 @@ def assignment1_showcase(ds: AGNews, choice: int = None):
 
         analyze_model_errors(logreg_model, ds, split="dev", min_examples=10)
 
-        svm_model = get_model(SVC(kernel="linear", max_iter=1000), ds)
+        svm_model = get_model(SVC(kernel="linear", C=0.1), ds)
 
         analyze_model_errors(svm_model, ds, split="dev", min_examples=10)
 
@@ -73,8 +83,6 @@ def assignment1_showcase(ds: AGNews, choice: int = None):
 
 
 def main():
-    # Ensure the AG News dataset is downloaded and saved as CSV files
-
     if DEBUG:
         import os, sys
 
@@ -84,6 +92,7 @@ def main():
 
     if DEBUG:
         print("Loading AG News dataset...")
+        
     ds = AGNews(path=DATA_DIR)
 
     # Parser for allow running specific functionalities directly from command line without going through menus
