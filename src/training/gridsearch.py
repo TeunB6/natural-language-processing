@@ -12,7 +12,7 @@ def svm_gridsearch(data: AGNews, param_grid={}, eval: bool = True) -> None:
     # Grid search with k-fold cross-validation
     if DEBUG:
         print(f"Starting SVM Grid Search with parameters: {param_grid}")
-    svm_model = SVC(kernel="Linear", random_state=RANDOM_SEED)
+    svm_model = SVC(kernel="Linear", max_iter=10000, random_state=RANDOM_SEED)
 
     grid_search = GridSearchCV(
         estimator=svm_model,
@@ -20,7 +20,7 @@ def svm_gridsearch(data: AGNews, param_grid={}, eval: bool = True) -> None:
         cv=5,
         n_jobs=-1,
         refit=True,
-        scoring="neg_mean_squared_error",
+        scoring="accuracy",
         verbose=2 if DEBUG else 0,
     )
 
@@ -32,7 +32,7 @@ def svm_gridsearch(data: AGNews, param_grid={}, eval: bool = True) -> None:
         f.write("params,mean_test_score,std_test_score\n")
         for i in range(len(results["params"])):
             params = results["params"][i]
-            mean_score = -results["mean_test_score"][i]
+            mean_score = results["mean_test_score"][i]
             std_score = results["std_test_score"][i]
             f.write(f"{params},{mean_score:.4f},{std_score:.4f}\n")
 
