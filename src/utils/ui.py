@@ -9,9 +9,13 @@ def cli_menu(question: str, options: dict[str, Callable]) -> int:
     for i, option in enumerate(options.keys(), 1):
         CONSOLE.print(f"{i}. {option}")
 
-    choice = CONSOLE.input("\n[bold cyan]Enter your choice:[/bold cyan] ").strip()
+    choice = CONSOLE.input(
+        "\n[bold cyan]Enter your choice:[/bold cyan] "
+    ).strip()
     if DEBUG:
-        print(f"User selected option: {choice}")  # Debug print to check user input
+        print(
+            f"User selected option: {choice}"
+        )  # Debug print to check user input
     if choice.isdigit() and 1 <= int(choice) <= len(options):
         selected_option = list(options.values())[int(choice) - 1]
         selected_option()

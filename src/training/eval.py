@@ -1,12 +1,8 @@
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from sklearn.base import BaseEstimator
 from src.data.data import AGNews
-from typing import Optional
-
-# Visualization
 from rich.table import Table
 from rich.panel import Panel
-
 from src.const import CONSOLE, DEBUG
 from src.utils.error_analysis_pipeline import ErrorAnalysisPipeline
 
@@ -33,10 +29,10 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
             style="bold green",
         )
     )
-    
+
     if DEBUG:
-        print(y_pred.shape, y.shape, X.shape)    
-    
+        print(y_pred.shape, y.shape, X.shape)
+
     table = Table(title="Evaluation Metrics")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="magenta")
@@ -55,7 +51,9 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
         cm_table.add_column(label_mapping[i + 1], style="magenta")
 
     for i in range(cm.shape[0]):
-        row = [label_mapping[i + 1]] + [str(cm[i, j]) for j in range(cm.shape[1])]
+        row = [label_mapping[i + 1]] + [
+            str(cm[i, j]) for j in range(cm.shape[1])
+        ]
         cm_table.add_row(*row)
     CONSOLE.print(cm_table)
 

@@ -17,8 +17,10 @@ uv sync
 ```
 3. Run the project.
 ```bash
-uv run main.py
+uv run main.py [--assignment] [--functionality]
 ```
+ * `--assignment`: The assignment to run. Dependent on `functionality`.
+ * `--functionality`: The functionality to run. Dependent on `asssignment`.
 
 ## Command Line Interface
 

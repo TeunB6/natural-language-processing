@@ -50,7 +50,9 @@ class AGNews:
             stop_words="english", max_features=max_features
         )
 
-        self.X_train = self.vectorizer.fit_transform(self.train_df["text"].to_list())
+        self.X_train = self.vectorizer.fit_transform(
+            self.train_df["text"].to_list()
+        )
         self.X_dev = self.vectorizer.transform(self.dev_df["text"].to_list())
         self.X_test = self.vectorizer.transform(self.test_df["text"].to_list())
 
