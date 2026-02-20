@@ -50,16 +50,10 @@ def assignment1_showcase(ds: AGNews, choice: Optional[int] = None) -> None:
             {
                 "Dev Set": lambda: (
                     evaluate_model(logreg_model, ds),
-                    CONSOLE.input(
-                        "[bold cyan]Press Enter to analyze SVM errors on Dev Set...[/bold cyan]"
-                    ),
                     evaluate_model(svm_model, ds),
                 ),
                 "Test Set": lambda: (
                     evaluate_model(logreg_model, ds, use_test=True),
-                    CONSOLE.input(
-                        "[bold cyan]Press Enter to analyze SVM errors on Test Set...[/bold cyan]"
-                    ),
                     evaluate_model(svm_model, ds, use_test=True),
                 ),
                 "Back to Menu": lambda: None,
@@ -90,9 +84,6 @@ def assignment1_showcase(ds: AGNews, choice: Optional[int] = None) -> None:
                     analyze_model_errors(
                         logreg_model, ds, split="dev", min_examples=10
                     ),
-                    CONSOLE.input(
-                        "[bold cyan]Press Enter to analyze SVM errors on Dev Set...[/bold cyan]"
-                    ),
                     analyze_model_errors(
                         svm_model, ds, split="dev", min_examples=10
                     ),
@@ -100,9 +91,6 @@ def assignment1_showcase(ds: AGNews, choice: Optional[int] = None) -> None:
                 "Test Set": lambda: (
                     analyze_model_errors(
                         logreg_model, ds, split="test", min_examples=10
-                    ),
-                    CONSOLE.input(
-                        "[bold cyan]Press Enter to analyze SVM errors on Test Set...[/bold cyan]"
                     ),
                     analyze_model_errors(
                         svm_model, ds, split="test", min_examples=10
