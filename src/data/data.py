@@ -1,5 +1,6 @@
 from src.data.download import download_ag_news
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import StandardScaler
 import polars as pl
 from pathlib import Path
 from src.const import DEBUG
@@ -68,6 +69,12 @@ class AGNews:
             print("y_dev shape:", self.y_dev.shape)
             print("X_test shape:", self.X_test.shape)
             print("y_test shape:", self.y_test.shape)
+    
+    def normalize(self):
+        self.scaler = StandardScaler(with_mean=False)  # with_mean=False for sparse data
+        self.X_train = self.scaler.fit_transform(self.X_train)
+        self.X_dev = self.scaler.transform(self.X_dev)
+        self.X_test = self.scaler.transform(self.X_test)
 
     @property
     def label_mapping(self):
