@@ -1,5 +1,7 @@
 # datasets
 data/*
+results/*
+logs/*
 
 # habrok: ignore habrok folder with slurm scripts and out files
 habrok/*

@@ -4,7 +4,7 @@ import numpy as np
 from rich.table import Table
 from rich.panel import Panel
 import textwrap
-from src.const import CONSOLE
+from src.const import LOGGER
 from src.data.data import AGNews
 
 
@@ -20,22 +20,25 @@ class ErrorAnalyzer:
         show_full_text: bool = False,
         wrap_width: int = 80,
     ) -> None:
-        """
-        Initialize the class.
+        """Initialize the class.
 
         Args:
-            model (Any): The trained model to analyze.
+            model (Any): The trained model.
             ds (AGNews): The AGNews dataset object.
-            min_examples (int, optional): The minimum number of examples toshow for each error type. Defaults to 10.
-            show_full_text (bool, optional): Whether to show the full text of misclassified examples. Defaults to False.
-            wrap_width (int, optional): The width to wrap text at. Defaults to 80.
+            min_examples (int, optional): The minimum number of examples to
+                                          show for each error type. Defaults to
+                                          10.
+            show_full_text (bool, optional): Whether to show the full text of
+                                             misclassified examples. Defaults
+                                             to False.
+            wrap_width (int, optional): The width to wrap text at. Defaults to
+                                        80.
         """
         self.model = model
         self.ds = ds
         self.min_examples = min_examples
         self.show_full_text = show_full_text
         self.wrap_width = wrap_width
-        self.console = CONSOLE
         self.X = None
         self.y = None
         self.df = None
@@ -45,14 +48,17 @@ class ErrorAnalyzer:
         self.error_stats = {}
 
     def analyze(self, split: str = "dev") -> Dict[Tuple[int, int], List[Dict]]:
-        """Perform the error analysis pipeline.
+        """Analyze misclassifications in a given dataset split.
 
         Args:
-            split (str, optional): The dataset split to analyze. Defaults to "dev".
-            get_confidence (bool, optional): Whether to compute prediction confidence scores. Defaults to False.
+            split (str, optional): The dataset split to analyze. Defaults to
+                                   "dev".
 
         Returns:
-            Dict[Tuple[int, int], List[Dict]]: A dictionary mapping (predicted_label, actual_label) tuples to lists of misclassified examples.
+            Dict[Tuple[int, int], List[Dict]]: A dictionary mapping
+                                               (predicted_label, actual_label)
+                                               tuples to lists of misclassified
+                                               examples.
         """
         self._load_split(split)
         self._generate_predictions()
@@ -108,7 +114,8 @@ class ErrorAnalyzer:
             self.confidence = None
 
     def _extract_misclassifications(self) -> None:
-        """Extract misclassified examples and group them by (predicted_label, actual_label)."""
+        """Extract misclassified examples and group them by (predicted_label,
+        actual_label)."""
         misclass_mask = self.predictions != self.y
         indices = np.where(misclass_mask)[0]
         label_map = self.ds.label_mapping
@@ -161,7 +168,7 @@ class ErrorAnalyzer:
             title=f"{self.model.__class__.__name__} Error Summary ({split_name})",
         )
 
-        self.console.print(panel)
+        LOGGER.log_and_print(panel)
 
     def display_error_matrix(self) -> None:
         """Display a confusion matrix of errors in a table."""
@@ -183,7 +190,7 @@ class ErrorAnalyzer:
 
             table.add_row(*row)
 
-        self.console.print(table)
+        LOGGER.log_and_print(table)
 
     def display_error_group(
         self, pred: int, actual: int, examples: list, limit: int
@@ -208,7 +215,7 @@ class ErrorAnalyzer:
 
             table.add_row(*row)
 
-        self.console.print(table)
+        LOGGER.log_and_print(table)
 
     def display_hardest_cases(self, min_examples: int = 10) -> None:
         """Get the hardest cases (lowest confidence predictions).
@@ -220,9 +227,10 @@ class ErrorAnalyzer:
             None
         """
         if self.confidence is None:
-            self.console.print(
-                "[yellow]Warning: Confidence scores not available.[/yellow]"
+            warning_panel = Panel(
+                "[yellow]Warning: Confidence scores not available.[/yellow]",
             )
+            LOGGER.log_and_print(warning_panel)
             return None
 
         # Flatten all misclassifications into a single list
@@ -253,4 +261,4 @@ class ErrorAnalyzer:
 
             table.add_row(path, wrapped, f"{ex['confidence']:.4f}")
 
-        self.console.print(table)
+        LOGGER.log_and_print(table)

@@ -15,7 +15,7 @@ class ErrorAnalysisPipeline:
         self,
         model: Any,
         ds: AGNews,
-        split: str = "test",
+        split: str = "dev",
         min_examples: int = 10,
         wrap_width: int = 80,
         show_full_text: bool = True,
@@ -25,10 +25,16 @@ class ErrorAnalysisPipeline:
         Args:
             model (Any): The trained model to analyze.
             ds (AGNews): The AGNews dataset object.
-            split (str, optional): The dataset split to analyze. Defaults to "dev".
-            min_examples (int, optional): The minimum number of examples to show for each error type. Defaults to 10.
-            wrap_width (int, optional): The width to wrap text at. Defaults to 80.
-            show_full_text (bool, optional): Whether to show the full text of misclassified examples. Defaults to True.
+            split (str, optional): The dataset split to analyze. Defaults to
+                                   "dev".
+            min_examples (int, optional): The minimum number of examples to
+                                          show for each error type. Defaults to
+                                          10.
+            wrap_width (int, optional): The width to wrap text at. Defaults to
+                                        80.
+            show_full_text (bool, optional): Whether to show the full text of
+                                             misclassified examples. Defaults
+                                             to True.
         """
         analyzer = ErrorAnalyzer(
             model,

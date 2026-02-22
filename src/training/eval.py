@@ -3,7 +3,7 @@ from sklearn.base import BaseEstimator
 from src.data.data import AGNews
 from rich.table import Table
 from rich.panel import Panel
-from src.const import CONSOLE, DEBUG
+from src.const import DEBUG, LOGGER
 from src.utils.error_analysis_pipeline import ErrorAnalysisPipeline
 
 
@@ -19,16 +19,23 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
     """
     # Predict on the dev set
     X, y = (ds.X_dev, ds.y_dev) if not use_test else (ds.X_test, ds.y_test)
+    split_name = "Test" if use_test else "Dev"
 
+    LOGGER.info(f"Evaluating {model.__class__.__name__} on {split_name} set")
     y_pred = model.predict(X)
 
+    # Calculate metrics
+    acc = accuracy_score(y, y_pred)
+    f1 = f1_score(y, y_pred, average="weighted")
+
+    LOGGER.info(f"Accuracy: {acc:.4f}, F1 Score: {f1:.4f}")
+
     # Display initial metrics in a table
-    CONSOLE.print(
-        Panel(
-            f"{model.__class__.__name__} Results on {"Test" if use_test else "Dev"} Set",
-            style="bold green",
-        )
+    panel = Panel(
+        f"{model.__class__.__name__} Results on {split_name} Set",
+        style="bold green",
     )
+    LOGGER.log_and_print(panel)
 
     if DEBUG:
         print(y_pred.shape, y.shape, X.shape)
@@ -36,14 +43,13 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
     table = Table(title="Evaluation Metrics")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="magenta")
-    table.add_row("Accuracy", f"{accuracy_score(y, y_pred):.4f}")
-    table.add_row(
-        "F1 Score (weighted)", f"{f1_score(y, y_pred, average='weighted'):.4f}"
-    )
-    CONSOLE.print(table)
+    table.add_row("Accuracy", f"{acc:.4f}")
+    table.add_row("F1 Score (weighted)", f"{f1:.4f}")
+    LOGGER.log_and_print(table)
     cm = confusion_matrix(y, y_pred)
 
-    # Make Confusion Matrix more readable by mapping label indices to class names
+    # Make Confusion Matrix more readable by mapping label indices
+    # to class names
     label_mapping = ds.label_mapping
     cm_table = Table(title="Confusion Matrix (with Class Names)")
     cm_table.add_column("Predicted \\ Actual", style="bold white")
@@ -55,7 +61,7 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
             str(cm[i, j]) for j in range(cm.shape[1])
         ]
         cm_table.add_row(*row)
-    CONSOLE.print(cm_table)
+    LOGGER.log_and_print(cm_table)
 
 
 def analyze_model_errors(
@@ -63,8 +69,7 @@ def analyze_model_errors(
     ds: AGNews,
     split: str = "dev",
     min_examples: int = 10,
-    show_hardest: bool = True,
-):
+) -> None:
     """
     Run error analysis on model predictions.
 
@@ -73,8 +78,11 @@ def analyze_model_errors(
         ds: AGNews dataset
         split: Dataset split to analyze ('dev' or 'test')
         min_examples: Minimum number of examples to show per error type
-        show_hardest: Whether to show the hardest cases
     """
+    LOGGER.info(
+        f"Running error analysis for {model.__class__.__name__} "
+        f"on {split.upper()} set"
+    )
     pipeline = ErrorAnalysisPipeline()
     pipeline.run(
         model=model,
