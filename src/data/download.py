@@ -2,9 +2,15 @@ import polars as pl
 from src.const import DATA_DIR, RANDOM_SEED
 
 
-def download_ag_news():
+def download_ag_news() -> None:
+    """
+    Download the AG News dataset and save it as CSV files for
+    train/dev/test splits.
+    """
     splits = {"train": "train.jsonl", "test": "test.jsonl"}
-    train_df = pl.read_ndjson("hf://datasets/sh0416/ag_news/" + splits["train"])
+    train_df = pl.read_ndjson(
+        "hf://datasets/sh0416/ag_news/" + splits["train"]
+    )
     test_df = pl.read_ndjson("hf://datasets/sh0416/ag_news/" + splits["test"])
 
     # Randomize and take dev split from train

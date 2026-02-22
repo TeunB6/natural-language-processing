@@ -1,5 +1,13 @@
 # datasets
 data/*
+results/*
+logs/*
+
+# habrok: ignore habrok folder with slurm scripts and out files
+habrok/*
+
+# models
+models/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
