@@ -2,12 +2,14 @@ from src.data.data import AGNews, AGNewsWord2Vec
 from src.training.eval import evaluate_model, analyze_model_errors
 from src.training.train import train_model, get_model
 from src.training.gridsearch import svm_gridsearch
+from src.training.trainer import Trainer
+from src.models.cnn import CNNClassifier
 import argparse
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 import numpy as np
 from rich.panel import Panel
-from src.const import CONSOLE, DATA_DIR, DEBUG, RETRAIN_MODEL, LOGGER
+from src.const import CONSOLE, DATA_DIR, DEBUG, RETRAIN_MODEL, LOGGER, DEVICE
 from src.utils.ui import cli_menu
 from typing import Optional
 import os
@@ -194,7 +196,24 @@ def assignment2_showcase(
         train = ds.get_torch_dataset("train")
         dev = ds.get_torch_dataset("dev")
         test = ds.get_torch_dataset("test")
-                
+        
+        trainer = Trainer(
+            model=None,  # Placeholder, replace with actual CNN/LSTM model
+            train_data=train,
+            eval_data=dev,
+        )
+        
+        def train_cnn():
+            trainer.model = CNNClassifier(
+                vocab_size=len(ds.kv),
+                embedding_dim=100,
+                num_classes=4,
+            ).to(DEVICE)
+            
+            trainer.train(num_epochs=5, learning_rate=1e-3)
+            
+            
+                        
         # Placeholder for CNN and LSTM training/evaluation
         panel = Panel(
             "CNN and LSTM training/evaluation functionality is not implemented yet.",

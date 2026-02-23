@@ -1,19 +1,22 @@
 from torch.utils.data import Dataset
-from torch import Tensor
+from torch import as_tensor, Tensor
+from typing import Any, Literal
+
+from src.const import DEVICE
 
 
 class TorchDataset(Dataset):
     """A simple PyTorch Dataset wrapper for the AG News dataset."""
 
-    def __init__(self, X: Tensor, y: Tensor) -> None:
+    def __init__(self, X: Any, y: Any) -> None:
         """Initialize the dataset with features and labels.
 
         Args:
-            X (Tensor): The feature tensor.
-            y (Tensor): The label tensor.
+            X (Any): The features, needs to be castable to Tensor.
+            y (Any): The labels, needs to be castable to Tensor.
         """
-        self.X = X
-        self.y = y
+        self.X = as_tensor(X, device=DEVICE)
+        self.y = as_tensor(y, device=DEVICE)
 
     def __len__(self) -> int:
         """Return the number of samples in the dataset."""
