@@ -1,4 +1,4 @@
-from src.data.data import AGNews
+from src.data.data import AGNews, AGNewsWord2Vec
 from src.training.eval import evaluate_model, analyze_model_errors
 from src.training.train import train_model, get_model
 from src.training.gridsearch import svm_gridsearch
@@ -15,7 +15,6 @@ import sys
 
 
 def assignment1_showcase(
-    ds: AGNews,
     choice: Optional[int] = None,
 ) -> None:
     """Showcase Assignment 1.
@@ -25,6 +24,9 @@ def assignment1_showcase(
         choice (Optional[int], optional): The choice of functionality to
                                           showcase. Defaults to None.
     """
+    LOGGER.info("Loading AG News dataset...")
+    ds = AGNews(path=DATA_DIR)
+    LOGGER.info("Dataset loaded successfully")
 
     def train_and_evaluate() -> None:
         """Train baseline models and evaluate them on dev/test sets."""
@@ -116,17 +118,13 @@ def assignment1_showcase(
                     analyze_model_errors(
                         logreg_model, ds, split="dev", min_examples=10
                     ),
-                    analyze_model_errors(
-                        svm_model, ds, split="dev", min_examples=10
-                    ),
+                    analyze_model_errors(svm_model, ds, split="dev", min_examples=10),
                 ),
                 "Test Set": lambda: (
                     analyze_model_errors(
                         logreg_model, ds, split="test", min_examples=10
                     ),
-                    analyze_model_errors(
-                        svm_model, ds, split="test", min_examples=10
-                    ),
+                    analyze_model_errors(svm_model, ds, split="test", min_examples=10),
                 ),
                 "Back to Menu": lambda: None,
             },
@@ -152,9 +150,73 @@ def assignment1_showcase(
                 "Perform SVM Grid Search": grid_search,
                 "Analyze Errors on Models": analyze_errors,
                 "Back to Main Menu": lambda: LOGGER.log_and_print(
-                    Panel(
-                        "[bold yellow]Returning to Main Menu...[/bold yellow]"
-                    )
+                    Panel("[bold yellow]Returning to Main Menu...[/bold yellow]")
+                ),
+            },
+        )
+
+
+def assignment2_showcase(
+    choice: Optional[int] = None,
+):
+    ds = AGNewsWord2Vec(path=DATA_DIR)
+
+    def word_similarity(ds: AGNewsWord2Vec):
+        """Showcase word similarity functionality."""
+        while True:
+            word = CONSOLE.input("Enter a word to find its nearest neighbors (x to exit): ").strip()
+            
+            if word.lower() == 'x':
+                LOGGER.log_and_print(Panel("[bold yellow]Exiting Word Similarity Showcase...[/bold yellow]"))
+                break
+            
+            neighbors = ds.nearest_neighbors(word, topn=10)
+            if neighbors:
+                panel = Panel(
+                    f"Nearest neighbors for [bold green]{word}[/bold green]:\n\n"
+                    + "\n".join(
+                        [
+                            f"{neighbor[0]} (similarity: {neighbor[1]:.4f})"
+                            for neighbor in neighbors
+                        ]
+                    ),
+                    style="bold blue",
+                )
+                LOGGER.log_and_print(panel)
+            else:
+                panel = Panel(
+                    f"No neighbors found for [bold red]{word}[/bold red]. It may not be in the vocabulary.",
+                    style="bold red",
+                )
+                LOGGER.log_and_print(panel)
+    
+    def train_and_evaluate_cnn_lstm(ds: AGNewsWord2Vec):
+        """Train and evaluate CNN and LSTM models."""
+        train = ds.get_torch_dataset("train")
+        dev = ds.get_torch_dataset("dev")
+        test = ds.get_torch_dataset("test")
+                
+        # Placeholder for CNN and LSTM training/evaluation
+        panel = Panel(
+            "CNN and LSTM training/evaluation functionality is not implemented yet.",
+            style="bold yellow",
+        )
+        LOGGER.log_and_print(panel)
+
+    if choice is not None:
+        if choice == 1:
+            word_similarity(ds)
+        elif choice == 2:
+            train_and_evaluate_cnn_lstm(ds)
+        return None
+    else:
+        cli_menu(
+            "Select a functionality to showcase:",
+            {
+                "Examine Word Similarity": lambda: word_similarity(ds),
+                "Train and Evaluate CNN/LSTM Models": lambda: train_and_evaluate_cnn_lstm(ds),
+                "Back to Main Menu": lambda: LOGGER.log_and_print(
+                    Panel("[bold yellow]Returning to Main Menu...[/bold yellow]")
                 ),
             },
         )
@@ -170,17 +232,11 @@ def main():
         print(f"Script arguments: {sys.argv}")
         print("Loading AG News dataset...")
 
-    LOGGER.info("Loading AG News dataset...")
-    ds = AGNews(path=DATA_DIR)
-    LOGGER.info("Dataset loaded successfully")
-
     # Parser for allow running specific functionalities directly from command
     # line without going through menus.
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--assignment", type=int, choices=[1], help="Assignment number"
-    )
+    parser.add_argument("--assignment", type=int, choices=[1, 2], help="Assignment number")
     parser.add_argument(
         "--functionality",
         type=int,
@@ -193,11 +249,16 @@ def main():
     if args.assignment and args.functionality:
         if args.assignment == 1:
             if args.functionality == 1:
-                assignment1_showcase(ds, choice=1)
+                assignment1_showcase(choice=1)
             elif args.functionality == 2:
-                assignment1_showcase(ds, choice=2)
+                assignment1_showcase(choice=2)
             elif args.functionality == 3:
-                assignment1_showcase(ds, choice=3)
+                assignment1_showcase(choice=3)
+        elif args.assignment == 2:
+            if args.functionality == 1:
+                assignment2_showcase(choice=1)
+            elif args.functionality == 2:
+                assignment2_showcase(choice=2)
     else:
         panel = Panel("AG News NLP Pipeline", style="bold blue")
         LOGGER.log_and_print(panel)
@@ -206,8 +267,9 @@ def main():
                 "Select an assignment to showcase different functionalities:",
                 {
                     "Assignment 1 - Dataset Showcase & Baseline Models": (
-                        lambda: assignment1_showcase(ds)
+                        lambda: assignment1_showcase()
                     ),
+                    "Assignment 2 - CNN & LSTM": (lambda: assignment2_showcase()),
                     "Exit": lambda: exit(0),
                 },
             )

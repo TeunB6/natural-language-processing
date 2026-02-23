@@ -49,9 +49,7 @@ def svm_gridsearch(
 
     # Get output directory for this assignment
     output_dir = get_output_path(assignment=assignment)
-    out_path = (
-        output_dir / f"svm_gridsearch_results_{datetime.now().isoformat()}.csv"
-    )
+    out_path = output_dir / f"svm_gridsearch_results_{datetime.now().isoformat()}.csv"
 
     results = grid_search.cv_results_
     with open(out_path, "w") as f:

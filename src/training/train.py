@@ -49,9 +49,7 @@ def get_model(
     model_path = output_dir / f"{model.__class__.__name__}.pkl"
 
     if not model_path.exists():
-        LOGGER.info(
-            f"Model {model_path.name} not found. Training new model..."
-        )
+        LOGGER.info(f"Model {model_path.name} not found. Training new model...")
         model = train_model(model, ds, assignment=assignment)
     else:
         LOGGER.info(f"Loading {model.__class__.__name__} from {model_path}")

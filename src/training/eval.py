@@ -57,9 +57,7 @@ def evaluate_model(model: BaseEstimator, ds: AGNews, use_test: bool = False):
         cm_table.add_column(label_mapping[i + 1], style="magenta")
 
     for i in range(cm.shape[0]):
-        row = [label_mapping[i + 1]] + [
-            str(cm[i, j]) for j in range(cm.shape[1])
-        ]
+        row = [label_mapping[i + 1]] + [str(cm[i, j]) for j in range(cm.shape[1])]
         cm_table.add_row(*row)
     LOGGER.log_and_print(cm_table)
 
