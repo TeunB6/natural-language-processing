@@ -155,7 +155,6 @@ def assignment1_showcase(
             },
         )
 
-
 def assignment2_showcase(
     choice: Optional[int] = None,
 ):

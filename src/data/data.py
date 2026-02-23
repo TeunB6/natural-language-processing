@@ -131,6 +131,7 @@ class AGNewsWord2Vec(AGNews):
             )
             kv = w2v.wv
             kv.save("models/ag_news_word2vec.kv")
+        kv.add_vector("<PAD>", np.zeros(100))  # Add a padding token with zero vector
         return kv
         
         
@@ -191,11 +192,8 @@ class AGNewsWord2Vec(AGNews):
 
     def get_torch_dataset(self, split=Literal["train", "dev", "test"], max_length=256):
         if split == "train":
-            print("huh")
             X = self._pad_sequences(self.train_df["embeddings"].to_list(), max_length)
-            print("ok")
             y = self.train_df["label"].to_numpy()
-            print("wtk")
         elif split == "dev":
             X = self._pad_sequences(self.dev_df["embeddings"].to_list(), max_length)
             y = self.dev_df["label"].to_numpy()
