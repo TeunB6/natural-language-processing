@@ -253,11 +253,15 @@ def main():
                 assignment1_showcase(choice=2)
             elif args.functionality == 3:
                 assignment1_showcase(choice=3)
+            else:
+                assignment1_showcase()
         elif args.assignment == 2:
             if args.functionality == 1:
                 assignment2_showcase(choice=1)
             elif args.functionality == 2:
                 assignment2_showcase(choice=2)
+            else:
+                assignment2_showcase()
     else:
         panel = Panel("AG News NLP Pipeline", style="bold blue")
         LOGGER.log_and_print(panel)
