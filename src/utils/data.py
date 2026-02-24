@@ -15,8 +15,8 @@ class TorchDataset(Dataset):
             X (Any): The features, needs to be castable to Tensor.
             y (Any): The labels, needs to be castable to Tensor.
         """
-        self.X = as_tensor(X, device=DEVICE)
-        self.y = as_tensor(y, device=DEVICE)
+        self.X = as_tensor(X)
+        self.y = as_tensor(y)
 
     def __len__(self) -> int:
         """Return the number of samples in the dataset."""

@@ -14,8 +14,16 @@ class CNNClassifier(nn.Module):
     def forward(self, x):
         x = x.unsqueeze(1)  # Add channel dimension
         conv_outputs = [torch.relu(conv(x)).squeeze(3) for conv in self.convs]
-        pooled_outputs = [torch.max(conv_output, dim=2)[0] for conv_output in conv_outputs]
+        pooled_outputs = [torch.max(conv_output, dim=2)[0] for conv_output in conv_outputs] # TODO: make this class modular and not code the maxpool manually but use a layerconfig json.
         cat = torch.cat(pooled_outputs, dim=1)
         drop = self.dropout(cat)
-        fc = self.fc(drop)
-        return self.softmax(fc)
+        return self.fc(drop)
+
+    def predict(self, x, return_probs: bool=True):
+        self.eval()
+        with torch.no_grad():
+            logits = self.forward(x)
+        if return_probs:
+            return self.softmax(logits)
+        else:
+            return torch.argmax(logits, dim=1) + 1  # Add 1 to match original label indices (1-4)

@@ -5,7 +5,7 @@ import torch.optim as optim
 import torch
 
 from rich.progress import track
-from src.const import LOGGER, DEVICE
+from src.const import LOGGER, DEVICE, DEBUG
 
 import numpy as np
 
@@ -43,21 +43,27 @@ class Trainer:
             shuffle=False,
         )
         
+        
+    def reset_history(self):
+        """Reset the training history."""
         self.history = {"train_loss": [], "eval_loss": []}
     
-    def train(self, num_epochs: int=10, learning_rate: float=1e-3, config: dict=None):
+    def train(self, num_epochs: int=10, learning_rate: float=1e-3, config: dict={}):
         """Train the model."""
+        
+        # Reset training history at the start of training
+        self.reset_history()
         
         # Set up optimizer and loss function
         optimizer = config.get("optimizer", optim.Adam)(self.model.parameters(), lr=learning_rate)
         criterion = config.get("criterion", nn.CrossEntropyLoss)()
 
-        for epoch in track(range(num_epochs), description=f"Training Epoch {epoch+1}/{num_epochs}"):
+        for epoch in track(range(num_epochs), description=f"Training Epochs"):
             self.model.train()
             total_loss = 0
             for batch in track(self.train_loader, description="Training Batches"):
                 # Update model parameters based on the batch
-                inputs, labels = batch
+                inputs, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
                 optimizer.zero_grad()
                 outputs = self.model(inputs)
                 loss = criterion(outputs, labels)
@@ -78,7 +84,7 @@ class Trainer:
         total_loss = 0
         with torch.no_grad():
             for batch in track(self.eval_loader, description="Evaluating"):
-                inputs, labels = batch
+                inputs, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
                 outputs = self.model(inputs)
                 loss = criterion(outputs, labels)
                 total_loss += loss.item()
@@ -94,7 +100,7 @@ class Trainer:
         plt.figure()
         plt.plot(x_train, self.history["train_loss"], label="Train Loss")
         plt.plot(x_eval, self.history["eval_loss"], label="Eval Loss")
-        plt.xlabel("Epochs")
+        plt.xlabel("Batches")
         plt.ylabel("Loss")
         plt.title("Training and Evaluation Loss History")
         plt.legend()
@@ -103,3 +109,15 @@ class Trainer:
             LOGGER.info(f"Training history plot saved to {save_path}")
         if show:
             plt.show()
+            
+    
+    def save_model(self, path: str):
+        """Save the model to the specified path."""
+        torch.save(self.model.state_dict(), path)
+        LOGGER.info(f"Model saved to {path}")
+    
+    def load_model(self, path: str):
+        """Load the model from the specified path."""
+        self.model.load_state_dict(torch.load(path))
+        self.model.to(DEVICE)
+        LOGGER.info(f"Model loaded from {path}")
