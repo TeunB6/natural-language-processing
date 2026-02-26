@@ -1,29 +1,102 @@
 import torch.nn as nn
 import torch
+import torch.nn.functional as F
+from typing import Optional, Dict
+
 
 class CNNClassifier(nn.Module):
-    def __init__(self, embedding_dim: int, num_classes: int, num_filters: int=100, filter_sizes: list[int]=[3, 4, 5]):
-        super(CNNClassifier, self).__init__()
-        self.convs = nn.ModuleList([
-            nn.Conv2d(1, num_filters, (fs, embedding_dim)) for fs in filter_sizes
-        ])
-        self.dropout = nn.Dropout(0.5)
-        self.fc = nn.Linear(num_filters * len(filter_sizes), num_classes)
-        self.softmax = nn.Softmax(dim=1)
-    
-    def forward(self, x):
-        x = x.unsqueeze(1)  # Add channel dimension
-        conv_outputs = [torch.relu(conv(x)).squeeze(3) for conv in self.convs]
-        pooled_outputs = [torch.max(conv_output, dim=2)[0] for conv_output in conv_outputs] # TODO: make this class modular and not code the maxpool manually but use a layerconfig json.
-        cat = torch.cat(pooled_outputs, dim=1)
-        drop = self.dropout(cat)
-        return self.fc(drop)
+    """Class for a CNN Classifier on NLP."""
 
-    def predict(self, x, return_probs: bool=True):
+    def __init__(self, config: Optional[Dict] = None) -> None:
+        """Initialise the class.
+
+        Args:
+            config (Optional[Dict], optional): The configuration of the CNN.
+                                               Defaults to None.
+        """
+        super(CNNClassifier, self).__init__()
+
+        if config is None:
+            config = {}
+
+        # Defaults.
+        embedding_dim = config.get("embedding_dim", 100)
+        num_classes = config.get("num_classes", 4)
+        num_filters = config.get("num_filters", 100)
+        filter_sizes = config.get("filter_sizes", [3, 4, 5])
+        dropout_rate = config.get("dropout", 0.5)
+
+        # Define layers.
+        self.convs = nn.ModuleList(
+            [
+                nn.Conv1d(
+                    in_channels=embedding_dim, out_channels=num_filters, kernel_size=fs
+                )
+                for fs in filter_sizes
+            ]
+        )
+        self.pool = nn.AdaptiveMaxPool1d(1)
+        self.dropout = nn.Dropout(dropout_rate)
+        self.fc = nn.Linear(num_filters * len(filter_sizes), num_classes)
+
+        self._init_weights()
+
+    def _init_weights(self) -> None:
+        """Initialize weights for the CNN"""
+        for m in self.modules():
+            if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Handle forward pass of the CNN.
+
+        Args:
+            x (torch.Tensor): The batched input embeddings of shape
+                              `(batch_size, seq_len, embedding_dim)`.
+
+        Returns:
+            torch.Tensor: The raw logit predictions of shape
+                          `(batch_size, num_classes)`.
+        """
+        x = x.permute(0, 2, 1)
+        conv_outputs = []
+
+        for conv in self.convs:
+            conv_out = F.relu(conv(x))
+            pooled_out = self.pool(conv_out).squeeze(2)
+            conv_outputs.append(pooled_out)
+
+        # Concatenate outputs from all filters.
+        cat = torch.cat(conv_outputs, dim=1)
+        drop = self.dropout(cat)
+        logits = self.fc(drop)
+
+        return logits
+
+    def predict(self, x: torch.Tensor, use_softmax: bool = True) -> torch.Tensor:
+        """Predict for an input batch.
+
+        Args:
+            x (torch.Tensor): The batched input embeddings of shape
+                              `(batch_size, seq_len, embedding_dim)`.
+            return_probs (bool, optional): Whether to return the class
+                                           probabilities with softmax. Defaults
+                                           to True.
+
+        Returns:
+            torch.Tensor: A tensor containing either the class probabilities
+                          of shape `(batch_size, num_classes)` or the predicted
+                          class indices of shape `(batch_size,)`.
+        """
         self.eval()
         with torch.no_grad():
             logits = self.forward(x)
-        if return_probs:
-            return self.softmax(logits)
+
+        if use_softmax:
+            return F.softmax(logits, dim=1)
+
         else:
-            return torch.argmax(logits, dim=1) + 1  # Add 1 to match original label indices (1-4)
+            return torch.argmax(logits, dim=1) + 1

@@ -2,9 +2,6 @@ from sklearn.base import BaseEstimator
 from src.data.data import AGNews
 from src.utils.output import get_output_path
 from src.const import LOGGER
-from torch.nn import Module
-from src.training.trainer import Trainer
-import torch
 import pickle
 
 
