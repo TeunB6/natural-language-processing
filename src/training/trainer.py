@@ -23,7 +23,7 @@ plt.rcParams.update(
         "ytick.labelsize": 14,
         "axes.titlesize": 18,
         "legend.fontsize": 16,
-        "lines.linewidth": 4,
+        "lines.linewidth": 2,
         "text.usetex": False,
         "font.family": "serif",
         "image.cmap": "magma",
@@ -225,6 +225,7 @@ class Trainer:
         Args:
             path (str): The path to load the model from.
         """
+        
         self.model.load_state_dict(torch.load(path))
         self.model.to(DEVICE)
         LOGGER.info(f"Model loaded from {path}")
