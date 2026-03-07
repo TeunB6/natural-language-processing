@@ -43,15 +43,14 @@ class LSTMClassifier(nn.Module):
         self.pool = nn.AdaptiveMaxPool1d(1)
         self.fc = nn.Linear(rep_dim, num_classes)        
 
-    def forward(self, x: torch.Tensor, lengths: torch.Tensor) -> torch.Tensor:
-        emb = self.embedding_dropout(self.embedding(x))
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        lengths = x.size()
 
         packed = nn.utils.rnn.pack_padded_sequence(
-            x, lengths.cpu(), batch_first=True, enforce_sorted=False
+            x, batch_first=True, enforce_sorted=False, lengths=lengths
         )
 
-
-        _, (h_n, _) = self.pool(self.lstm(packed))
+        _, (h_n, _) = self.lstm(packed)
         h_last = h_n[-1]
         drop = self.rep_dropout(h_last)
         logits = self.fc(drop)
