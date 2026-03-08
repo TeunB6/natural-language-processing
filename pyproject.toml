@@ -8,6 +8,7 @@ dependencies = [
     "gensim>=4.4.0",
     "matplotlib>=3.10.8",
     "polars>=1.38.1",
+    "pyyaml>=6.0.3",
     "rich>=14.3.2",
     "scikit-learn>=1.8.0",
     "torch>=2.10.0",
