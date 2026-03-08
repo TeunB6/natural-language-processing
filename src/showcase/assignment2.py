@@ -25,9 +25,9 @@ class Assignment2Showcase:
             elif choice == 2:
                 self.train_and_evaluate_cnn()
             elif choice == 3:
-                self.analyze_cnn_errors()
+                self.train_and_evaluate_lstm()
             elif choice == 4:
-                self.lstm_placeholder()
+                self.analyze_errors()
             elif choice == 5:
                 self.ablation_study("max_sequence_length")
             return
@@ -36,8 +36,8 @@ class Assignment2Showcase:
             {
                 "Examine Word Similarity": self.word_similarity,
                 "Train and Evaluate CNN Model": self.train_and_evaluate_cnn,
-                "Analyze Errors on CNN Model": self.analyze_cnn_errors,
-                "Train and Evaluate LSTM Model (Not Implemented)": self.lstm_placeholder,
+                "Train and Evaluate LSTM Model": self.train_and_evaluate_lstm,
+                "Analyze Errors": self.analyze_errors,
                 "Ablation Study on Sequence Length (Only CNN for Now)": lambda: self.ablation_study(
                     "max_sequence_length"
                 ),
@@ -119,7 +119,7 @@ class Assignment2Showcase:
         return cnn_model
     
     def get_or_train_lstm_model(self):
-        """Get the trained CNN model or train a new one if it doesn't exist."""
+        """Get the trained LSTM model or train a new one if it doesn't exist."""
         output_dir = get_output_path(assignment=2)
         model_path = output_dir / "lstm_model.pt"
 
@@ -135,7 +135,7 @@ class Assignment2Showcase:
         lstm_model = LSTMClassifier(config=lstm_config).to(DEVICE)
 
         if RETRAIN_MODEL or not model_path.exists():
-            self._train_cnn(lstm_model, output_dir, model_path)
+            self._train_lstm(lstm_model, output_dir, model_path)
         else:
             LOGGER.info(f"Loading LSTM model from {model_path}")
             try:
@@ -145,7 +145,7 @@ class Assignment2Showcase:
             except RuntimeError as e:
                 LOGGER.log_and_print(Panel(f"[bold red]Error loading model: {e}[/bold red]"))
                 LOGGER.log_and_print(Panel(f"[bold yellow]Training new model...[/bold yellow]"))
-                self._train_cnn(lstm_model, output_dir, model_path)
+                self._train_lstm(lstm_model, output_dir, model_path)
         lstm_model.eval()
 
         return lstm_model
@@ -169,28 +169,38 @@ class Assignment2Showcase:
             },
         )
 
-    def analyze_cnn_errors(self):
-        """Run error analysis on the CNN model."""
+    def analyze_errors(self):
+        """Run error analysis on the models."""
         cnn_model = self.get_or_train_cnn_model()
+        lstm_model = self.get_or_train_lstm_model()
 
         # Run Error Analysis
         cli_menu(
-            "Analyze CNN errors for which split?",
+            "Analyze errors for which split?",
             {
-                "Dev Set": lambda: analyze_model_errors(
+                "Dev Set": lambda: (analyze_model_errors(
                     cnn_model, self.ds, split="dev", min_examples=10
-                ),
-                "Test Set": lambda: analyze_model_errors(
+                    ), analyze_model_errors(
+                        lstm_model, self.ds, split="dev", min_examples=10
+                )),
+                "Test Set": lambda: (analyze_model_errors(
                     cnn_model, self.ds, split="test", min_examples=10
-                ),
+                ), analyze_model_errors(
+                    lstm_model, self.ds, split="test", min_examples=10
+                )),
                 "Back to Menu": lambda: None,
             },
         )
 
-    def lstm_placeholder(self):
+    def train_and_evaluate_lstm(self, split: int | None = None):
         # Placeholder for LSTM training/evaluation
         lstm_model = self.get_or_train_lstm_model()
-
+        if split is not None:
+            if split == 1:
+                evaluate_model(lstm_model, self.ds, use_test=False)
+            elif split == 2:
+                evaluate_model(lstm_model, self.ds, use_test=True)
+            return
         # Evaluate the Model
         cli_menu(
             "Evaluate CNN on which set?",
@@ -259,7 +269,7 @@ class Assignment2Showcase:
         if return_trainer:
             return trainer
 
-    def _train_lstm(self, lstm_model: LSTMClassifier, output_dir: Path, model_path: Path) -> None: 
+    def _train_lstm(self, lstm_model: LSTMClassifier, output_dir: Path, model_path: Path, return_trainer:bool = True) -> None: 
         #TODO: reduce code duplication with _train_cnn (reason for seperate function is mainly to set lr and stuff differently for lstm, should be refactored)
         LOGGER.log_and_print(
             Panel("[bold yellow]Training LSTM Classifier...[/bold yellow]")
@@ -284,7 +294,7 @@ class Assignment2Showcase:
         )
 
         # Train the LSTM Model
-        trainer.train(num_epochs=50, learning_rate=1e-7, early_stopping=True, patience=5)
+        trainer.train(num_epochs=50, learning_rate=1e-3, early_stopping=True, patience=3)
 
         # Plot and save Training History
         plot_path = output_dir / "lstm_training_history.png"
@@ -293,12 +303,16 @@ class Assignment2Showcase:
         # Save the trained model
         trainer.save_model(model_path)
 
+        acc = trainer.evaluate(lambda pred, labels: torch.sum(pred == (torch.argmax(labels, dim=1) + 1)) / len(labels), use_predict=True)
+
         LOGGER.log_and_print(
             Panel(
-                f"[bold green]Training complete!\nHistory plot saved to {plot_path}\nModel saved to {model_path}[/bold green]"
+                f"[bold green]Training complete!\nHistory plot saved to {plot_path}\nModel saved to {model_path}\nAccuracy:{acc:.2f}[/bold green]"
             )
         )
 
+        if return_trainer:
+            return trainer
     
     def ablation_study(self, parameter: str):
         # Placeholder for ablation study functionality

@@ -44,7 +44,7 @@ class CNNClassifier(nn.Module):
     def _init_weights(self) -> None:
         """Initialize weights for the CNN"""
         for m in self.modules():
-            if isinstance(m, nn.Conv1d) or isinstance(m, nn.Linear):
+            if isinstance(m, nn.Conv1d):
                 nn.init.xavier_uniform_(m.weight)
 
                 if m.bias is not None:

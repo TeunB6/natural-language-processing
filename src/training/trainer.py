@@ -57,7 +57,11 @@ class Trainer:
             shuffle=True,
         )
 
-        self.eval_data = eval_data
+        self.eval_loader = DataLoader(
+            eval_data,
+            batch_size=batch_size,
+            shuffle=False,
+        )
         
         
     def reset_history(self):
@@ -114,11 +118,11 @@ class Trainer:
 
                 loss.backward()
                 optimizer.step()
-                self.history["train_loss"].append(loss.item())
 
                 total_loss += loss.item()
 
             avg_loss = total_loss / len(self.train_loader)
+            self.history["train_loss"].append(avg_loss)
             eval_loss = self.evaluate(criterion)
 
             self.history["eval_loss"].append(eval_loss)
@@ -165,17 +169,18 @@ class Trainer:
         """
         self.model.eval()
 
+        total_loss = 0
 
         with torch.no_grad():
-            inputs, labels = self.eval_data[:]
-            inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
-            outputs = (
-                self.model.predict(inputs, return_prob=False) if use_predict else self.model(inputs)
-            )
-            print(outputs, labels, torch.argmax(labels, dim=1) + 1)
-            loss = criterion(outputs, labels)
+            for batch in self.eval_loader:
+                inputs, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
+                outputs = (
+                    self.model.predict(inputs, return_prob=False) if use_predict else self.model(inputs)
+                )
+                loss = criterion(outputs, labels)
+                total_loss += loss.item()
 
-        return loss.item()
+        return total_loss / len(self.eval_loader)
 
     def plot_history(self, show: bool = True, save_path: Optional[str] = None) -> None:
         """Plot the training and evaluation loss history.
@@ -186,6 +191,7 @@ class Trainer:
             save_path (Optional[str], optional): The path to save the plot to.
                                                  Defaults to None.
         """
+        # Create x-axis values for train and eval loss based on the number of recorded losses.
         x_train = np.asarray(range(1, len(self.history["train_loss"]) + 1))
         x_eval = np.asarray(range(1, len(self.history["eval_loss"]) + 1))
         x_eval = x_eval * (
@@ -195,7 +201,7 @@ class Trainer:
         plt.figure()
         plt.plot(x_train, self.history["train_loss"], label="Train Loss")
         plt.plot(x_eval, self.history["eval_loss"], label="Eval Loss")
-        plt.xlabel("Batches")
+        plt.xlabel("Epochs")
         plt.ylabel("Loss")
         plt.title("Training and Evaluation Loss History")
         plt.legend()
