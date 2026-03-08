@@ -12,4 +12,4 @@ DEVICE = "cuda" if torch_cuda_available() else "cpu"
 DEBUG = True
 CONSOLE = Console()
 LOGGER = Logger("nlp_pipeline")
-RETRAIN_MODEL = False
+RETRAIN_MODEL = True

@@ -63,24 +63,32 @@ class Assignment1Showcase:
         if RETRAIN_MODEL:
             panel = Panel("Training: SVM...", style="bold yellow")
             LOGGER.log_and_print(panel)
-            svm_model = train_model(
-                LinearSVC(C=0.1),
-                self.ds,
-                assignment=1,
-            ) if self.use_updated_models else train_model(
-                SVC(kernel="linear", C=0.1),
-                self.ds,
-                assignment=1,
+            svm_model = (
+                train_model(
+                    LinearSVC(C=0.1),
+                    self.ds,
+                    assignment=1,
+                )
+                if self.use_updated_models
+                else train_model(
+                    SVC(kernel="linear", C=0.1),
+                    self.ds,
+                    assignment=1,
+                )
             )
         else:
-            svm_model = get_model(
-                LinearSVC(C=0.1),
-                self.ds,
-                assignment=1,
-            ) if self.use_updated_models else get_model(
-                SVC(kernel="linear", C=0.1),
-                self.ds,
-                assignment=1,
+            svm_model = (
+                get_model(
+                    LinearSVC(C=0.1),
+                    self.ds,
+                    assignment=1,
+                )
+                if self.use_updated_models
+                else get_model(
+                    SVC(kernel="linear", C=0.1),
+                    self.ds,
+                    assignment=1,
+                )
             )
 
         # Evaluate both models on the set
@@ -122,15 +130,19 @@ class Assignment1Showcase:
             self.ds,
             assignment=1,
         )
-        
-        svm_model = get_model(
-            LinearSVC(C=0.1),
-            self.ds,
-            assignment=1,
-        ) if self.use_updated_models else get_model(
-            SVC(kernel="linear", C=0.1),
-            self.ds,
-            assignment=1,
+
+        svm_model = (
+            get_model(
+                LinearSVC(C=0.1),
+                self.ds,
+                assignment=1,
+            )
+            if self.use_updated_models
+            else get_model(
+                SVC(kernel="linear", C=0.1),
+                self.ds,
+                assignment=1,
+            )
         )
 
         cli_menu(
@@ -140,13 +152,17 @@ class Assignment1Showcase:
                     analyze_model_errors(
                         logreg_model, self.ds, split="dev", min_examples=10
                     ),
-                    analyze_model_errors(svm_model, self.ds, split="dev", min_examples=10),
+                    analyze_model_errors(
+                        svm_model, self.ds, split="dev", min_examples=10
+                    ),
                 ),
                 "Test Set": lambda: (
                     analyze_model_errors(
                         logreg_model, self.ds, split="test", min_examples=10
                     ),
-                    analyze_model_errors(svm_model, self.ds, split="test", min_examples=10),
+                    analyze_model_errors(
+                        svm_model, self.ds, split="test", min_examples=10
+                    ),
                 ),
                 "Back to Menu": lambda: None,
             },

@@ -32,6 +32,7 @@ def train_model(
         LOGGER.info(f"Model saved to {model_path}")
     return model
 
+
 def get_model(
     model: BaseEstimator,
     ds: AGNews,

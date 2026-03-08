@@ -6,11 +6,13 @@ from src.const import CONSOLE, DATA_DIR, RETRAIN_MODEL, LOGGER, DEVICE
 from src.training.eval import evaluate_model, analyze_model_errors
 from rich.panel import Panel
 from src.utils.ui import cli_menu
+from rich.progress import track
 from src.utils.data import get_available_vram
 from typing import Optional
 import torch
 
 from pathlib import Path
+
 
 class Assignment2Showcase:
     ds = AGNewsWord2Vec(path=DATA_DIR)
@@ -25,20 +27,24 @@ class Assignment2Showcase:
                 self.analyze_cnn_errors()
             elif choice == 4:
                 self.lstm_placeholder()
-            return None
-        else:
-            cli_menu(
-                "Select a functionality to showcase:",
-                {
-                    "Examine Word Similarity": self.word_similarity,
-                    "Train and Evaluate CNN Model": self.train_and_evaluate_cnn,
-                    "Analyze Errors on CNN Model": self.analyze_cnn_errors,
-                    "Train and Evaluate LSTM Model (Not Implemented)": self.lstm_placeholder,
-                    "Back to Main Menu": lambda: LOGGER.log_and_print(
-                        Panel("[bold yellow]Returning to Main Menu...[/bold yellow]")
-                    ),
-                },
-            )
+            elif choice == 5:
+                self.ablation_study("max_sequence_length")
+            return
+        cli_menu(
+            "Select a functionality to showcase:",
+            {
+                "Examine Word Similarity": self.word_similarity,
+                "Train and Evaluate CNN Model": self.train_and_evaluate_cnn,
+                "Analyze Errors on CNN Model": self.analyze_cnn_errors,
+                "Train and Evaluate LSTM Model (Not Implemented)": self.lstm_placeholder,
+                "Ablation Study on Sequence Length (Only CNN for Now)": lambda: self.ablation_study(
+                    "max_sequence_length"
+                ),
+                "Back to Main Menu": lambda: LOGGER.log_and_print(
+                    Panel("[bold yellow]Returning to Main Menu...[/bold yellow]")
+                ),
+            },
+        )
 
     def word_similarity(self):
         """Showcase word similarity functionality."""
@@ -100,17 +106,26 @@ class Assignment2Showcase:
                     torch.load(model_path, map_location=DEVICE, weights_only=True)
                 )
             except RuntimeError as e:
-                LOGGER.log_and_print(Panel(f"[bold red]Error loading model: {e}[/bold red]"))
-                LOGGER.log_and_print(Panel(f"[bold yellow]Training new model...[/bold yellow]"))
+                LOGGER.log_and_print(
+                    Panel(f"[bold red]Error loading model: {e}[/bold red]")
+                )
+                LOGGER.log_and_print(
+                    Panel(f"[bold yellow]Training new model...[/bold yellow]")
+                )
                 self._train_cnn(cnn_model, output_dir, model_path)
         cnn_model.eval()
 
         return cnn_model
 
-    def train_and_evaluate_cnn(self):
+    def train_and_evaluate_cnn(self, split: int | None = None):
         """Train (if needed) and evaluate the CNN model."""
         cnn_model = self.get_or_train_cnn_model()
-
+        if split is not None:
+            if split == 1:
+                evaluate_model(cnn_model, self.ds, use_test=False)
+            elif split == 2:
+                evaluate_model(cnn_model, self.ds, use_test=True)
+            return
         # Evaluate the Model
         cli_menu(
             "Evaluate CNN on which set?",
@@ -146,24 +161,35 @@ class Assignment2Showcase:
             style="bold yellow",
         )
         LOGGER.log_and_print(panel)
-        
-    
-    def _train_cnn(self, cnn_model: CNNClassifier, output_dir: Path, model_path: Path) -> None:
+
+    def _train_cnn(
+        self,
+        cnn_model: CNNClassifier,
+        output_dir: Path,
+        model_path: Path,
+        plot_path: Optional[Path] = None,
+        max_series_len: int = 256,
+        return_trainer: bool = True,
+    ) -> Trainer | None:
         LOGGER.log_and_print(
             Panel("[bold yellow]Training CNN Classifier...[/bold yellow]")
         )
-        
+
         if get_available_vram() > 16.0:
-            train_data = self.ds.get_torch_dataset("train")
-            dev_data = self.ds.get_torch_dataset("dev")
+            train_data = self.ds.get_torch_dataset("train", max_length=max_series_len)
+            dev_data = self.ds.get_torch_dataset("dev", max_length=max_series_len)
         else:
             LOGGER.log_and_print(
                 Panel(
                     f"[bold red]Warning: Available VRAM is low ({get_available_vram():.2f} GB). Using (slow) memory efficient preprocessing for training.[/bold red]"
                 )
             )
-            train_data = AGNewsWord2VecDataset(path=DATA_DIR, split="train")
-            dev_data = AGNewsWord2VecDataset(path=DATA_DIR, split="test")
+            train_data = AGNewsWord2VecDataset(
+                path=DATA_DIR, split="train", max_length=max_series_len
+            )
+            dev_data = AGNewsWord2VecDataset(
+                path=DATA_DIR, split="test", max_length=max_series_len
+            )
         trainer = Trainer(
             model=cnn_model,
             train_data=train_data,
@@ -172,36 +198,78 @@ class Assignment2Showcase:
         )
 
         # Train the CNN Model
-        trainer.train(num_epochs=50, learning_rate=1e-7, early_stopping=True, patience=5)
+        trainer.train(
+            num_epochs=1, learning_rate=1e-3, early_stopping=True, patience=5
+        )
 
         # Plot and save Training History
-        plot_path = output_dir / "cnn_training_history.png"
+        if plot_path is None:
+            plot_path = output_dir / "cnn_training_history.png"
         trainer.plot_history(show=False, save_path=str(plot_path))
 
         # Save the trained model
         trainer.save_model(model_path)
+        
+        acc = trainer.evaluate(lambda pred, labels: torch.sum(pred == (torch.argmax(labels, dim=1) + 1)) / len(labels), use_predict=True)
 
         LOGGER.log_and_print(
             Panel(
-                f"[bold green]Training complete!\nHistory plot saved to {plot_path}\nModel saved to {model_path}[/bold green]"
+                f"[bold green]Training complete!\nHistory plot saved to {plot_path}\nModel saved to {model_path}\nAccuracy:{acc:.2f}[/bold green]"
             )
         )
+        if return_trainer:
+            return trainer
 
-    
-    def ablation_study(self):
+    def ablation_study(self, parameter: str):
         # Placeholder for ablation study functionality
-        panel = Panel(
-            "Ablation study functionality is not implemented yet.",
-            style="bold yellow",
-        )
-        LOGGER.log_and_print(panel)
-        
-        # Load Data
-        
-        # Configure and Train Ablated Models
-        
-        # Evaluate and Compare Models
-        
-        # Plot Ablation Results
-   
 
+        if parameter == "max_sequence_length":
+            # Example of how to modify the dataset for different max sequence lengths
+            results = {}
+            for max_length in track(
+                [32, 64, 128, 256, 512],
+                description="Running ablation study on max sequence length...",
+            ):
+                cnn_model = CNNClassifier(
+                    config={
+                        "embedding_dim": 100,
+                        "num_classes": 4,
+                        "num_filters": 100,
+                        "filter_sizes": [3, 4, 5, 6, 7],
+                        "dropout": 0.5,
+                    }
+                ).to(DEVICE)
+
+                trainer = self._train_cnn(
+                    cnn_model,
+                    output_dir=get_output_path(assignment=2),
+                    model_path=get_output_path(assignment=2)
+                    / f"cnn_model_maxlen_{max_length}.pt",
+                    plot_path=get_output_path(assignment=2) / f"cnn_training_history_maxlen_{max_length}.png",
+                    max_series_len=max_length,
+                )
+                acc = trainer.evaluate(
+                    lambda pred, labels: torch.sum(pred == labels) / len(labels),
+                    use_predict=True,
+                )
+                results[max_length] = acc
+
+            LOGGER.log_and_print(
+                Panel(
+                    "[bold cyan]Ablation Study Results:[/bold cyan]\n"
+                    + "\n".join(
+                        [
+                            f"Max Length: {length:3d} | Accuracy: {acc:.4f}"
+                            for length, acc in results.items()
+                        ]
+                    ),
+                    style="bold green",
+                )
+            )
+
+        else:
+            LOGGER.log_and_print(
+                Panel(
+                    f"Ablation study for parameter '{parameter}' is not implemented yet."
+                )
+            )

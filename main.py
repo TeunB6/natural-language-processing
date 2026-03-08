@@ -1,9 +1,10 @@
 import argparse
 from rich.panel import Panel
-from src.const import  DEBUG, LOGGER
+from src.const import DEBUG, LOGGER
 from src.utils.ui import cli_menu
 import os
 import sys
+
 
 def main():
     """Run main pipeline."""
@@ -25,16 +26,17 @@ def main():
     parser.add_argument(
         "--functionality",
         type=int,
-        choices=[1, 2, 3, 4],
+        choices=[1, 2, 3, 4, 5, 6, 7, 8, 9],
         help="Functionality number",
     )
 
     args = parser.parse_args()
-    
+
     # define functions for each assignment to call the appropriate showcase based on the choice
     # avoid loading additional modules if not needed when running specific functionalities directly from command line
     def assignment1(choice=None):
         from src.showcase.assignment1 import Assignment1Showcase
+
         if choice == 1:
             Assignment1Showcase()(choice=1)
         elif choice == 2:
@@ -43,9 +45,10 @@ def main():
             Assignment1Showcase()(choice=3)
         else:
             Assignment1Showcase()()
-    
+
     def assignment2(choice=None):
         from src.showcase.assignment2 import Assignment2Showcase
+
         if choice == 1:
             Assignment2Showcase()(choice=1)
         elif choice == 2:
@@ -54,11 +57,14 @@ def main():
             Assignment2Showcase()(choice=3)
         elif choice == 4:
             Assignment2Showcase()(choice=4)
+        elif choice == 5:
+            Assignment2Showcase()(choice=5)
         else:
             Assignment2Showcase()()
-            
+
     def assignment3(choice=None):
         from src.showcase.assignment3 import Assignment3Showcase
+
         Assignment3Showcase()()
 
     if args.assignment and args.functionality:
@@ -73,15 +79,9 @@ def main():
             cli_menu(
                 "Select an assignment to showcase different functionalities:",
                 {
-                    "Assignment 1 - Dataset Showcase & Baseline Models": (
-                        assignment1
-                    ),
-                    "Assignment 2 - CNN & LSTM": (
-                        assignment2
-                    ),
-                    "Assignment 3 - Transformers (Not Implemented)": (
-                        assignment3
-                    ),
+                    "Assignment 1 - Dataset Showcase & Baseline Models": (assignment1),
+                    "Assignment 2 - CNN & LSTM": (assignment2),
+                    "Assignment 3 - Transformers (Not Implemented)": (assignment3),
                     "Exit": lambda: exit(0),
                 },
             )

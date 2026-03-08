@@ -56,12 +56,10 @@ class Trainer:
             batch_size=batch_size,
             shuffle=True,
         )
-        self.eval_loader = DataLoader(
-            eval_data,
-            batch_size=batch_size,
-            shuffle=False,
-        )
 
+        self.eval_data = eval_data
+        
+        
     def reset_history(self):
         """Reset the training history."""
         self.history = {"train_loss": [], "eval_loss": []}
@@ -95,7 +93,7 @@ class Trainer:
         # Set up optimizer and loss function.
         optimizer = optimizer(self.model.parameters(), lr=learning_rate)
         criterion = criterion().to(DEVICE)
-        
+
         if early_stopping:
             best_eval_loss = float("inf")
             best_model_state = None
@@ -156,7 +154,7 @@ class Trainer:
             self.model.load_state_dict(best_model_state)
             LOGGER.log_and_print("Restored the best model weights from early stopping.")
 
-    def evaluate(self, criterion: nn.Module) -> float:
+    def evaluate(self, criterion: nn.Module, use_predict: bool = False) -> float:
         """Evaluate the model on the evaluation set.
 
         Args:
@@ -167,18 +165,17 @@ class Trainer:
         """
         self.model.eval()
 
-        total_loss = 0
 
         with torch.no_grad():
-            for batch in track(self.eval_loader, description="Evaluating"):
-                inputs, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
-                outputs = self.model(inputs)
-                loss = criterion(outputs, labels)
-                total_loss += loss.item()
+            inputs, labels = self.eval_data[:]
+            inputs, labels = inputs.to(DEVICE), labels.to(DEVICE)
+            outputs = (
+                self.model.predict(inputs, return_prob=False) if use_predict else self.model(inputs)
+            )
+            print(outputs, labels, torch.argmax(labels, dim=1) + 1)
+            loss = criterion(outputs, labels)
 
-        avg_loss = total_loss / len(self.eval_loader)
-
-        return avg_loss
+        return loss.item()
 
     def plot_history(self, show: bool = True, save_path: Optional[str] = None) -> None:
         """Plot the training and evaluation loss history.
@@ -225,7 +222,7 @@ class Trainer:
         Args:
             path (str): The path to load the model from.
         """
-        
+
         self.model.load_state_dict(torch.load(path))
         self.model.to(DEVICE)
         LOGGER.info(f"Model loaded from {path}")

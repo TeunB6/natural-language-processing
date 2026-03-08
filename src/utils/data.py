@@ -33,9 +33,12 @@ class TorchDataset(Dataset):
         """
         return self.X[idx], self.y[idx]
 
+
 def get_available_vram():
     """Get the available VRAM on the current device."""
     if cuda.is_available():
-        return cuda.get_device_properties(DEVICE).total_memory / (1024 ** 3)  # Convert to GB
+        return cuda.get_device_properties(DEVICE).total_memory / (
+            1024**3
+        )  # Convert to GB
     else:
         return 0.0

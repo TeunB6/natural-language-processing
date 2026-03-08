@@ -219,7 +219,9 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
 
         return X
 
-    def get_torch_dataset(self, split=Literal["train", "dev", "test"], max_length=256):
+    def get_torch_dataset(
+        self, split=Literal["train", "dev", "test"], max_length: int = 256
+    ):
         if split == "train":
             df = self.train_df
         elif split == "dev":
@@ -252,6 +254,7 @@ class AGNewsWord2VecDataset(Dataset):
         path: Path | str | None = None,
         split=Literal["train", "dev", "test"],
         verbose: bool = True,
+        max_length: int = 256,
     ) -> None:
         self.ds = AGNewsWord2Vec(path=path, verbose=verbose)
         self.df = {
@@ -259,6 +262,8 @@ class AGNewsWord2VecDataset(Dataset):
             "dev": self.ds.dev_df,
             "test": self.ds.test_df,
         }[split]
+
+        self._max_length = max_length  # Set a maximum sequence length for padding
 
     def __len__(self) -> int:
         return len(self.df)
@@ -268,11 +273,11 @@ class AGNewsWord2VecDataset(Dataset):
         seq = self.df["embeddings"][idx]
 
         # Zero-pad buffer
-        padded_embedding = torch.zeros((256, 100), dtype=torch.float32)
+        padded_embedding = torch.zeros((self._max_length, 100), dtype=torch.float32)
 
         if seq is not None and len(seq) > 0:
             seq_arr = np.array(seq, dtype=np.float32)
-            length = min(len(seq_arr), 256)
+            length = min(len(seq_arr), self._max_length)
             padded_embedding[:length, :] = torch.from_numpy(seq_arr[:length])
 
         label = self.df["label"][idx]

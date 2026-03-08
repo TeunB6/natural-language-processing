@@ -76,13 +76,13 @@ class CNNClassifier(nn.Module):
 
         return logits
 
-    def predict(self, x: torch.Tensor, use_softmax: bool = True) -> torch.Tensor:
+    def predict(self, x: torch.Tensor, return_prob: bool = True) -> torch.Tensor:
         """Predict for an input batch.
 
         Args:
             x (torch.Tensor): The batched input embeddings of shape
                               `(batch_size, seq_len, embedding_dim)`.
-            return_probs (bool, optional): Whether to return the class
+            return_prob (bool, optional): Whether to return the class
                                            probabilities with softmax. Defaults
                                            to True.
 
@@ -95,7 +95,7 @@ class CNNClassifier(nn.Module):
         with torch.no_grad():
             logits = self.forward(x)
 
-        if use_softmax:
+        if return_prob:
             return F.softmax(logits, dim=1)
         else:
             return torch.argmax(logits, dim=1) + 1
