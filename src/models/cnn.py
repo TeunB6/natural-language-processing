@@ -30,7 +30,9 @@ class CNNClassifier(nn.Module):
         self.convs = nn.ModuleList(
             [
                 nn.Conv1d(
-                    in_channels=embedding_dim, out_channels=num_filters, kernel_size=fs
+                    in_channels=embedding_dim,
+                    out_channels=num_filters,
+                    kernel_size=fs,
                 )
                 for fs in filter_sizes
             ]
@@ -76,7 +78,9 @@ class CNNClassifier(nn.Module):
 
         return logits
 
-    def predict(self, x: torch.Tensor, return_prob: bool = True) -> torch.Tensor:
+    def predict(
+        self, x: torch.Tensor, return_prob: bool = True
+    ) -> torch.Tensor:
         """Predict for an input batch.
 
         Args:

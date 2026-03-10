@@ -50,7 +50,9 @@ class LSTMClassifier(nn.Module):
         out = self.fc(drop)
         return out
 
-    def predict(self, x: torch.Tensor, return_prob: bool = True) -> torch.Tensor:
+    def predict(
+        self, x: torch.Tensor, return_prob: bool = True
+    ) -> torch.Tensor:
         self.eval()
         with torch.no_grad():
             logits = self.forward(x)

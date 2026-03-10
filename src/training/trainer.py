@@ -63,7 +63,7 @@ class Trainer:
             batch_size=batch_size,
             shuffle=False,
         )
-        
+
         if test_data is not None:
             self.test_loader = DataLoader(
                 test_data,
@@ -116,7 +116,9 @@ class Trainer:
             self.model.train()
 
             total_loss = 0
-            for batch in track(self.train_loader, description="Training Batches"):
+            for batch in track(
+                self.train_loader, description="Training Batches"
+            ):
                 # Update model parameters based on the batch.
                 inputs, labels = batch[0].to(DEVICE), batch[1].to(DEVICE)
 
@@ -136,7 +138,9 @@ class Trainer:
 
             self.history["eval_loss"].append(eval_loss)
 
-            LOGGER.log_and_print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {avg_loss:.4f}, Eval Loss: {eval_loss:.4f}")
+            LOGGER.log_and_print(
+                f"Epoch {epoch+1}/{num_epochs}, Train Loss: {avg_loss:.4f}, Eval Loss: {eval_loss:.4f}"
+            )
 
             if early_stopping:
                 if eval_loss < best_eval_loss:
@@ -165,9 +169,16 @@ class Trainer:
             # If early stopping occurs, set the best model weights before the
             # end of training.
             self.model.load_state_dict(best_model_state)
-            LOGGER.log_and_print("Restored the best model weights from early stopping.")
+            LOGGER.log_and_print(
+                "Restored the best model weights from early stopping."
+            )
 
-    def evaluate(self, criterion: nn.Module, use_predict: bool = False, use_test: bool = False) -> float:
+    def evaluate(
+        self,
+        criterion: nn.Module,
+        use_predict: bool = False,
+        use_test: bool = False,
+    ) -> float:
         """Evaluate the model on the evaluation set.
 
         Args:
@@ -179,9 +190,11 @@ class Trainer:
         self.model.eval()
 
         total_loss = 0
-                
+
         if use_test and self.test_loader is None:
-            LOGGER.warning("Test loader is not available. Evaluating on dev set instead.")
+            LOGGER.warning(
+                "Test loader is not available. Evaluating on dev set instead."
+            )
             loader = self.dev_loader
         elif use_test and self.test_loader is not None:
             loader = self.test_loader
@@ -201,7 +214,9 @@ class Trainer:
 
         return total_loss / len(loader)
 
-    def plot_history(self, show: bool = True, save_path: Optional[str] = None) -> None:
+    def plot_history(
+        self, show: bool = True, save_path: Optional[str] = None
+    ) -> None:
         """Plot the training and evaluation loss history.
 
         Args:

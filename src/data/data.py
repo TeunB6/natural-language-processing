@@ -21,7 +21,9 @@ from typing import Literal
 class AGNews:
     """Class to handle loading and vectorizing the AG News dataset."""
 
-    def __init__(self, path: Path | str = "data/ag_news", verbose: bool = True) -> None:
+    def __init__(
+        self, path: Path | str = "data/ag_news", verbose: bool = True
+    ) -> None:
         """Initialize the class and load/vectorize the dataset."""
         self.path = Path(path)
         self.verbose = verbose
@@ -75,7 +77,9 @@ class AGNews:
             stop_words="english", max_features=max_features
         )
 
-        self.X_train = self.vectorizer.fit_transform(self.train_df["text"].to_list())
+        self.X_train = self.vectorizer.fit_transform(
+            self.train_df["text"].to_list()
+        )
         self.X_dev = self.vectorizer.transform(self.dev_df["text"].to_list())
         self.X_test = self.vectorizer.transform(self.test_df["text"].to_list())
 
@@ -89,7 +93,9 @@ class AGNews:
             print("y_test shape:", self.y_test.shape)
 
     def _normalize(self) -> None:
-        self.scaler = StandardScaler(with_mean=False)  # with_mean=False for sparse data
+        self.scaler = StandardScaler(
+            with_mean=False
+        )  # with_mean=False for sparse data
         self.X_train = self.scaler.fit_transform(self.X_train)
         self.X_dev = self.scaler.transform(self.X_dev)
         self.X_test = self.scaler.transform(self.X_test)
@@ -103,12 +109,17 @@ class AGNews:
 class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
     """PyTorch Dataset wrapper for the AG News dataset."""
 
-    def __init__(self, path: Path | str | None = None, verbose: bool = True) -> None:
+    def __init__(
+        self, path: Path | str | None = None, verbose: bool = True
+    ) -> None:
         self.path = Path(path) if path is not None else DATA_DIR
         self.verbose = verbose
         if self.verbose:
             LOGGER.log_and_print(
-                Panel("Initializing AGNewsWord2Vec dataset...", style="bold yellow")
+                Panel(
+                    "Initializing AGNewsWord2Vec dataset...",
+                    style="bold yellow",
+                )
             )
 
         if len(list(self.path.glob("*.csv"))) < 3:
@@ -123,7 +134,10 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
         if model_path.exists():
             if self.verbose:
                 LOGGER.log_and_print(
-                    Panel("Loading pre-trained Word2Vec model...", style="bold yellow")
+                    Panel(
+                        "Loading pre-trained Word2Vec model...",
+                        style="bold yellow",
+                    )
                 )
             kv = KeyedVectors.load(str(model_path), mmap="r")
         else:
@@ -157,17 +171,23 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
     def _embeddings(self):
         self.train_df = self.train_df.with_columns(
             pl.col("text")
-            .map_elements(lambda x: simple_preprocess(x), return_dtype=list[str])
+            .map_elements(
+                lambda x: simple_preprocess(x), return_dtype=list[str]
+            )
             .alias("tokens")
         )
         self.dev_df = self.dev_df.with_columns(
             pl.col("text")
-            .map_elements(lambda x: simple_preprocess(x), return_dtype=list[str])
+            .map_elements(
+                lambda x: simple_preprocess(x), return_dtype=list[str]
+            )
             .alias("tokens")
         )
         self.test_df = self.test_df.with_columns(
             pl.col("text")
-            .map_elements(lambda x: simple_preprocess(x), return_dtype=list[str])
+            .map_elements(
+                lambda x: simple_preprocess(x), return_dtype=list[str]
+            )
             .alias("tokens")
         )
 
@@ -177,7 +197,9 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
         self.train_df = self.train_df.with_columns(
             pl.col("tokens")
             .map_elements(
-                lambda tokens: [self.kv[word] for word in tokens if word in self.kv],
+                lambda tokens: [
+                    self.kv[word] for word in tokens if word in self.kv
+                ],
                 return_dtype=pl.List(pl.Array(float, shape=(100,))),
             )
             .alias("embeddings")
@@ -185,7 +207,9 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
         self.dev_df = self.dev_df.with_columns(
             pl.col("tokens")
             .map_elements(
-                lambda tokens: [self.kv[word] for word in tokens if word in self.kv],
+                lambda tokens: [
+                    self.kv[word] for word in tokens if word in self.kv
+                ],
                 return_dtype=pl.List(pl.Array(float, shape=(100,))),
             )
             .alias("embeddings")
@@ -193,7 +217,9 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
         self.test_df = self.test_df.with_columns(
             pl.col("tokens")
             .map_elements(
-                lambda tokens: [self.kv[word] for word in tokens if word in self.kv],
+                lambda tokens: [
+                    self.kv[word] for word in tokens if word in self.kv
+                ],
                 return_dtype=pl.List(pl.Array(float, shape=(100,))),
             )
             .alias("embeddings")
@@ -202,7 +228,9 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
     def _pad_sequences(self, sequences, max_length):
         #  Pre-allocate contiguous memory instead of manipulating Python lists
         num_samples = len(sequences)
-        vector_size = self.kv.vector_size if hasattr(self.kv, "vector_size") else 100
+        vector_size = (
+            self.kv.vector_size if hasattr(self.kv, "vector_size") else 100
+        )
 
         X = np.zeros((num_samples, max_length, vector_size), dtype=np.float32)
 
@@ -229,12 +257,16 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
         elif split == "test":
             df = self.test_df
         else:
-            raise ValueError("Invalid split name. Use 'train', 'dev', or 'test'.")
+            raise ValueError(
+                "Invalid split name. Use 'train', 'dev', or 'test'."
+            )
 
         X = self._pad_sequences(df["embeddings"], max_length)
 
         # Pull numeric array for memory-efficient one_hot conversion
-        y = one_hot(as_tensor(df["label"].to_numpy() - 1), num_classes=4).float()
+        y = one_hot(
+            as_tensor(df["label"].to_numpy() - 1), num_classes=4
+        ).float()
 
         return TorchDataset(X, y)
 
@@ -263,7 +295,9 @@ class AGNewsWord2VecDataset(Dataset):
             "test": self.ds.test_df,
         }[split]
 
-        self._max_length = max_length  # Set a maximum sequence length for padding
+        self._max_length = (
+            max_length  # Set a maximum sequence length for padding
+        )
 
     def __len__(self) -> int:
         return len(self.df)
@@ -273,7 +307,9 @@ class AGNewsWord2VecDataset(Dataset):
         seq = self.df["embeddings"][idx]
 
         # Zero-pad buffer
-        padded_embedding = torch.zeros((self._max_length, 100), dtype=torch.float32)
+        padded_embedding = torch.zeros(
+            (self._max_length, 100), dtype=torch.float32
+        )
 
         if seq is not None and len(seq) > 0:
             seq_arr = np.array(seq, dtype=np.float32)

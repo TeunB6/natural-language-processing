@@ -42,7 +42,9 @@ class Assignment2Showcase:
                     "max_sequence_length"
                 ),
                 "Back to Main Menu": lambda: LOGGER.log_and_print(
-                    Panel("[bold yellow]Returning to Main Menu...[/bold yellow]")
+                    Panel(
+                        "[bold yellow]Returning to Main Menu...[/bold yellow]"
+                    )
                 ),
             },
         )
@@ -104,7 +106,9 @@ class Assignment2Showcase:
             LOGGER.info(f"Loading CNN model from {model_path}")
             try:
                 cnn_model.load_state_dict(
-                    torch.load(model_path, map_location=DEVICE, weights_only=True)
+                    torch.load(
+                        model_path, map_location=DEVICE, weights_only=True
+                    )
                 )
             except RuntimeError as e:
                 LOGGER.log_and_print(
@@ -140,7 +144,9 @@ class Assignment2Showcase:
             LOGGER.info(f"Loading LSTM model from {model_path}")
             try:
                 lstm_model.load_state_dict(
-                    torch.load(model_path, map_location=DEVICE, weights_only=True)
+                    torch.load(
+                        model_path, map_location=DEVICE, weights_only=True
+                    )
                 )
             except RuntimeError as e:
                 LOGGER.log_and_print(
@@ -167,8 +173,12 @@ class Assignment2Showcase:
         cli_menu(
             "Evaluate CNN on which set?",
             {
-                "Dev Set": lambda: evaluate_model(cnn_model, self.ds, use_test=False),
-                "Test Set": lambda: evaluate_model(cnn_model, self.ds, use_test=True),
+                "Dev Set": lambda: evaluate_model(
+                    cnn_model, self.ds, use_test=False
+                ),
+                "Test Set": lambda: evaluate_model(
+                    cnn_model, self.ds, use_test=True
+                ),
                 "Back to Menu": lambda: None,
             },
         )
@@ -215,8 +225,12 @@ class Assignment2Showcase:
         cli_menu(
             "Evaluate CNN on which set?",
             {
-                "Dev Set": lambda: evaluate_model(lstm_model, self.ds, use_test=False),
-                "Test Set": lambda: evaluate_model(lstm_model, self.ds, use_test=True),
+                "Dev Set": lambda: evaluate_model(
+                    lstm_model, self.ds, use_test=False
+                ),
+                "Test Set": lambda: evaluate_model(
+                    lstm_model, self.ds, use_test=True
+                ),
                 "Back to Menu": lambda: None,
             },
         )
@@ -235,9 +249,15 @@ class Assignment2Showcase:
         )
 
         if get_available_vram() > 16.0:
-            train_data = self.ds.get_torch_dataset("train", max_length=max_series_len)
-            dev_data = self.ds.get_torch_dataset("dev", max_length=max_series_len)
-            test_data = self.ds.get_torch_dataset("test", max_length=max_series_len)
+            train_data = self.ds.get_torch_dataset(
+                "train", max_length=max_series_len
+            )
+            dev_data = self.ds.get_torch_dataset(
+                "dev", max_length=max_series_len
+            )
+            test_data = self.ds.get_torch_dataset(
+                "test", max_length=max_series_len
+            )
         else:
             LOGGER.log_and_print(
                 Panel(
@@ -262,7 +282,9 @@ class Assignment2Showcase:
         )
 
         # Train the CNN Model
-        trainer.train(num_epochs=20, learning_rate=1e-3, early_stopping=True, patience=3)
+        trainer.train(
+            num_epochs=20, learning_rate=1e-3, early_stopping=True, patience=3
+        )
 
         # Plot and save Training History
         if plot_path is None:
@@ -273,7 +295,9 @@ class Assignment2Showcase:
         trainer.save_model(model_path)
 
         acc = trainer.evaluate(
-            lambda pred, labels: torch.sum(pred == (torch.argmax(labels, dim=1) + 1))
+            lambda pred, labels: torch.sum(
+                pred == (torch.argmax(labels, dim=1) + 1)
+            )
             / len(labels),
             use_predict=True,
         )
@@ -334,7 +358,9 @@ class Assignment2Showcase:
         trainer.save_model(model_path)
 
         acc = trainer.evaluate(
-            lambda pred, labels: torch.sum(pred == (torch.argmax(labels, dim=1) + 1))
+            lambda pred, labels: torch.sum(
+                pred == (torch.argmax(labels, dim=1) + 1)
+            )
             / len(labels),
             use_predict=True,
         )
@@ -353,7 +379,10 @@ class Assignment2Showcase:
 
         if parameter == "max_sequence_length":
             # Example of how to modify the dataset for different max sequence lengths
-            results = {"cnn": {"test" : {}, "dev" : {}}, "lstm": {"test" : {}, "dev" : {}}}
+            results = {
+                "cnn": {"test": {}, "dev": {}},
+                "lstm": {"test": {}, "dev": {}},
+            }
             vals = [16, 32, 64, 128, 256]
             for max_length in track(
                 vals,
@@ -389,17 +418,17 @@ class Assignment2Showcase:
                     / f"cnn_training_history_maxlen_{max_length}.png",
                     max_series_len=max_length,
                 )
-                
+
                 accuracy = lambda pred, labels: torch.sum(
-                        pred == (torch.argmax(labels, dim=1) + 1)
-                    ) / len(labels)
-                
+                    pred == (torch.argmax(labels, dim=1) + 1)
+                ) / len(labels)
+
                 acc_cnn_test = trainer.evaluate(
                     accuracy,
                     use_predict=True,
-                    use_test=True, 
+                    use_test=True,
                 )
-                
+
                 acc_cnn_dev = trainer.evaluate(
                     accuracy,
                     use_predict=True,
@@ -415,7 +444,7 @@ class Assignment2Showcase:
                     plot_path=get_output_path(assignment=2)
                     / f"lstm_training_history_maxlen_{max_length}.png",
                 )
-                
+
                 acc_lstm_test = trainer.evaluate(
                     accuracy,
                     use_predict=True,
@@ -426,7 +455,7 @@ class Assignment2Showcase:
                     use_predict=True,
                     use_test=False,
                 )
-                
+
                 results["cnn"]["test"][max_length] = acc_cnn_test
                 results["cnn"]["dev"][max_length] = acc_cnn_dev
                 results["lstm"]["test"][max_length] = acc_lstm_test
@@ -437,14 +466,15 @@ class Assignment2Showcase:
                     "[bold cyan]Ablation Study Results on Test:[/bold cyan]\n"
                     + "\n".join(
                         [
-                            f"Max Sequence Length: {val} - CNN Accuracy: {results['cnn']["test"][val]:.4f}, LSTM Accuracy: {results['lstm']["test"][val]:.4f}"
+                            f"Max Sequence Length: {val} - CNN Accuracy: {results['cnn']['test'][val]:.4f}, LSTM Accuracy: {results['lstm']['test'][val]:.4f}"
                             for val in vals
                         ]
-                    ) + "\n\n" +
-                    "[bold cyan]Ablation Study Results on Dev:[/bold cyan]\n"
+                    )
+                    + "\n\n"
+                    + "[bold cyan]Ablation Study Results on Dev:[/bold cyan]\n"
                     + "\n".join(
                         [
-                            f"Max Sequence Length: {val} - CNN Accuracy: {results['cnn']["dev"][val]:.4f}, LSTM Accuracy: {results['lstm']["dev"][val]:.4f}"
+                            f"Max Sequence Length: {val} - CNN Accuracy: {results['cnn']['dev'][val]:.4f}, LSTM Accuracy: {results['lstm']['dev'][val]:.4f}"
                             for val in vals
                         ]
                     ),
@@ -453,12 +483,19 @@ class Assignment2Showcase:
             )
 
             with open(
-                get_output_path(assignment=2) / "ablation_study_results.csv", "w"
+                get_output_path(assignment=2) / "ablation_study_results.csv",
+                "w",
             ) as f:
-                f.write("model,max_sequence_length,accuracy_test,accuracy_dev\n")
+                f.write(
+                    "model,max_sequence_length,accuracy_test,accuracy_dev\n"
+                )
                 for val in vals:
-                    f.write(f"cnn,{val},{results['cnn']["test"][val]:.4f},{results['cnn']["dev"][val]:.4f}\n")
-                    f.write(f"lstm,{val},{results['lstm']["test"][val]:.4f},{results['lstm']["dev"][val]:.4f}\n")
+                    f.write(
+                        f"cnn,{val},{results['cnn']['test'][val]:.4f},{results['cnn']['dev'][val]:.4f}\n"
+                    )
+                    f.write(
+                        f"lstm,{val},{results['lstm']['test'][val]:.4f},{results['lstm']['dev'][val]:.4f}\n"
+                    )
 
         else:
             LOGGER.log_and_print(

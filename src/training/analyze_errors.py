@@ -108,7 +108,9 @@ class ErrorAnalyzer:
 
                     preds.append(torch.argmax(logits, dim=1).cpu().numpy() + 1)
                     probs.append(
-                        torch.nn.functional.softmax(logits, dim=1).cpu().numpy()
+                        torch.nn.functional.softmax(logits, dim=1)
+                        .cpu()
+                        .numpy()
                     )
 
             self.predictions = np.concatenate(preds)
@@ -118,7 +120,9 @@ class ErrorAnalyzer:
             self.predictions = self.model.predict(self.X)
 
             if hasattr(self.model, "predict_proba"):
-                self.confidence = np.max(self.model.predict_proba(self.X), axis=1)
+                self.confidence = np.max(
+                    self.model.predict_proba(self.X), axis=1
+                )
 
             elif hasattr(self.model, "decision_function"):
                 decisions = self.model.decision_function(self.X)
@@ -152,7 +156,9 @@ class ErrorAnalyzer:
                     "actual_class": label_map[actual],
                     "predicted_class": label_map[pred],
                     "confidence": (
-                        self.confidence[idx] if self.confidence is not None else None
+                        self.confidence[idx]
+                        if self.confidence is not None
+                        else None
                     ),
                     "index": idx,
                 }
@@ -252,11 +258,15 @@ class ErrorAnalyzer:
 
         # Flatten all misclassifications into a single list.
         all_errors = [
-            ex for examples in self.misclassifications.values() for ex in examples
+            ex
+            for examples in self.misclassifications.values()
+            for ex in examples
         ]
         hardest = sorted(
             all_errors,
-            key=lambda x: (x["confidence"] if x["confidence"] is not None else 1.0),
+            key=lambda x: (
+                x["confidence"] if x["confidence"] is not None else 1.0
+            ),
         )[:min_examples]
 
         table = Table(

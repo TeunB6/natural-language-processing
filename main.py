@@ -79,9 +79,13 @@ def main():
             cli_menu(
                 "Select an assignment to showcase different functionalities:",
                 {
-                    "Assignment 1 - Dataset Showcase & Baseline Models": (assignment1),
+                    "Assignment 1 - Dataset Showcase & Baseline Models": (
+                        assignment1
+                    ),
                     "Assignment 2 - CNN & LSTM": (assignment2),
-                    "Assignment 3 - Transformers (Not Implemented)": (assignment3),
+                    "Assignment 3 - Transformers (Not Implemented)": (
+                        assignment3
+                    ),
                     "Exit": lambda: exit(0),
                 },
             )

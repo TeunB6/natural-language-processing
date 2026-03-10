@@ -32,7 +32,9 @@ class Assignment1Showcase:
                     "Perform SVM Grid Search": self.grid_search,
                     "Analyze Errors on Models": self.analyze_errors,
                     "Back to Main Menu": lambda: LOGGER.log_and_print(
-                        Panel("[bold yellow]Returning to Main Menu...[/bold yellow]")
+                        Panel(
+                            "[bold yellow]Returning to Main Menu...[/bold yellow]"
+                        )
                     ),
                 },
             )
