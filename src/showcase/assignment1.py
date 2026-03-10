@@ -12,37 +12,48 @@ from typing import Optional
 
 
 class Assignment1Showcase:
+    """Class for assignment 1 showcase."""
+
     ds = AGNews(path=DATA_DIR)
     use_updated_models = True
 
     def __call__(self, choice: Optional[int] = None) -> None:
+        """Call the showcase.
+
+        Args:
+            choice (Optional[int], optional): The functionality to showcase.
+                                              Defaults to None.
+        """
         if choice is not None:
             if choice == 1:
                 self.train_and_evaluate()
+
             elif choice == 2:
                 self.grid_search()
+
             elif choice == 3:
                 self.analyze_errors()
-            return None
-        else:
-            cli_menu(
-                "Select a functionality to showcase:",
-                {
-                    "Train and Evaluate Baseline Models": self.train_and_evaluate,
-                    "Perform SVM Grid Search": self.grid_search,
-                    "Analyze Errors on Models": self.analyze_errors,
-                    "Back to Main Menu": lambda: LOGGER.log_and_print(
-                        Panel(
-                            "[bold yellow]Returning to Main Menu...[/bold yellow]"
-                        )
-                    ),
-                },
-            )
+
+            return
+
+        cli_menu(
+            "Select a functionality to showcase:",
+            {
+                "Train and Evaluate Baseline Models": self.train_and_evaluate,
+                "Perform SVM Grid Search": self.grid_search,
+                "Analyze Errors on Models": self.analyze_errors,
+                "Back to Main Menu": lambda: LOGGER.log_and_print(
+                    Panel(
+                        "[bold yellow]Returning to Main Menu...[/bold yellow]"
+                    )
+                ),
+            },
+        )
 
     def train_and_evaluate(self) -> None:
         """Train baseline models and evaluate them on dev/test sets."""
 
-        # Logistic Regression model
+        # Logistic Regression model.
         if RETRAIN_MODEL:
             panel = Panel(
                 "Training: Logistic Regression Model...",
@@ -54,6 +65,7 @@ class Assignment1Showcase:
                 self.ds,
                 assignment=1,
             )
+
         else:
             logreg_model = get_model(
                 LogisticRegression(max_iter=1000),
@@ -61,7 +73,7 @@ class Assignment1Showcase:
                 assignment=1,
             )
 
-        # SVM model
+        # SVM model.
         if RETRAIN_MODEL:
             panel = Panel("Training: SVM...", style="bold yellow")
             LOGGER.log_and_print(panel)
@@ -78,6 +90,7 @@ class Assignment1Showcase:
                     assignment=1,
                 )
             )
+
         else:
             svm_model = (
                 get_model(
@@ -93,7 +106,6 @@ class Assignment1Showcase:
                 )
             )
 
-        # Evaluate both models on the set
         cli_menu(
             "Evaluate on which set?",
             {

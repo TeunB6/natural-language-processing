@@ -1,4 +1,5 @@
 class Assignment3Showcase:
+    """Class for assignment 3 showcase."""
 
     def __call__(self):
         raise NotImplementedError(

@@ -5,10 +5,10 @@ from typing import Optional, Dict
 
 
 class CNNClassifier(nn.Module):
-    """Class for a CNN Classifier on NLP."""
+    """CNN Classifier class."""
 
     def __init__(self, config: Optional[Dict] = None) -> None:
-        """Initialise the class.
+        """Initialize the class.
 
         Args:
             config (Optional[Dict], optional): The configuration of the CNN.
@@ -96,10 +96,11 @@ class CNNClassifier(nn.Module):
                           class indices of shape `(batch_size,)`.
         """
         self.eval()
+
         with torch.no_grad():
             logits = self.forward(x)
 
         if return_prob:
             return F.softmax(logits, dim=1)
-        else:
-            return torch.argmax(logits, dim=1) + 1
+
+        return torch.argmax(logits, dim=1) + 1
