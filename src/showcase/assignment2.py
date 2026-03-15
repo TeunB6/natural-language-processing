@@ -1,4 +1,4 @@
-from src.data.data import AGNewsWord2Vec, AGNewsWord2VecDataset
+from src.data.agnews2vec import AGNewsWord2Vec, AGNewsWord2VecDataset
 from src.models.cnn import CNNClassifier
 from src.models.lstm import LSTMClassifier
 from src.training.trainer import Trainer
