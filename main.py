@@ -73,6 +73,9 @@ def main():
         """
         from src.showcase.assignment3 import Assignment3Showcase
 
+        if choice not in [1, 2]:
+            Assignment3Showcase()()
+
         Assignment3Showcase()(choice=choice)
 
     if args.assignment and args.functionality:
@@ -80,6 +83,8 @@ def main():
             assignment_1(choice=args.functionality)
         elif args.assignment == 2:
             assignment_2(choice=args.functionality)
+        elif args.assignment == 3:
+            assignment_3(choice=args.functionality)
     else:
         panel = Panel("AG News NLP Pipeline", style="bold blue")
 
