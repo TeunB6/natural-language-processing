@@ -63,6 +63,7 @@ def main():
         else:
             Assignment2Showcase()(choice=choice)
 
+    # TODO: Implement assignment 3.
     def assignment_3(choice: Optional[int] = None) -> None:
         """Set up the assignment 3 showcase.
 
@@ -72,8 +73,7 @@ def main():
         """
         from src.showcase.assignment3 import Assignment3Showcase
 
-        # TODO: Implement assignment 3.
-        Assignment3Showcase()()
+        Assignment3Showcase()(choice=choice)
 
     if args.assignment and args.functionality:
         if args.assignment == 1:
@@ -93,9 +93,7 @@ def main():
                         assignment_1
                     ),
                     "Assignment 2 - CNN & LSTM": (assignment_2),
-                    "Assignment 3 - Transformers (Not Implemented)": (
-                        assignment_3
-                    ),
+                    "Assignment 3 - Transformers": (assignment_3),
                     "Exit": lambda: exit(0),
                 },
             )
@@ -103,5 +101,6 @@ def main():
 
 if __name__ == "__main__":
     panel = Panel("Starting NLP Pipeline...", style="bold green")
+
     LOGGER.log_and_print(panel)
     main()

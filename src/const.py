@@ -18,3 +18,4 @@ DEBUG = data["debug"]
 CONSOLE = Console()
 LOGGER = Logger("nlp_pipeline")
 RETRAIN_MODEL = data["retrain_model"]
+HF_TOKEN = data["hf_token"]

@@ -14,7 +14,7 @@ from torch.utils.data import Dataset
 from torch import as_tensor, Tensor
 from torch.nn.functional import one_hot
 from typing import Literal, Union, Any
-from agnews import AGNews
+from src.data.agnews import AGNews
 
 
 class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
@@ -210,7 +210,7 @@ class AGNewsWord2Vec(AGNews, metaclass=SingletonMeta):
             ValueError: If an invalid split name is used.
 
         Returns:
-            TorchDataset: _description_
+            TorchDataset: A TorchDataset object.
         """
         if split == "train":
             df = self.train_df

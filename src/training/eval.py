@@ -1,5 +1,7 @@
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
-from src.data.data import AGNews, AGNewsWord2Vec
+from src.data.agnews import AGNews
+from src.data.agnews2vec import AGNewsWord2Vec
+from src.data.agnews2trans import AGNews2Trans
 from rich.table import Table
 from rich.panel import Panel
 from src.const import DEBUG, LOGGER, DEVICE
@@ -9,14 +11,12 @@ import torch
 import numpy as np
 
 
-def evaluate_model(
-    model: Any, ds: AGNews | AGNewsWord2Vec, use_test: bool = False
-) -> None:
+def evaluate_model(model: Any, ds: Any, use_test: bool = False) -> None:
     """Evaluate a trained model on the dev set and display results.
 
     Args:
         model (Any): The model.
-        ds (AGNews | AGNewsWord2Vec): The dataset.
+        ds (Any): The dataset.
         use_test (bool, optional): Whether to use the test set for evaluation.
                                    Defaults to False.
     """

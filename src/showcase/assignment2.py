@@ -52,7 +52,7 @@ class Assignment2Showcase:
                 "Train and Evaluate CNN Model": self.train_and_evaluate_cnn,
                 "Train and Evaluate LSTM Model": self.train_and_evaluate_lstm,
                 "Analyze Errors": self.analyze_errors,
-                "Ablation Study on Sequence Length (Only CNN for Now)": lambda: self.ablation_study(
+                "Ablation Study on Sequence Length": lambda: self.ablation_study(
                     "max_sequence_length"
                 ),
                 "Back to Main Menu": lambda: LOGGER.log_and_print(

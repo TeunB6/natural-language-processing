@@ -12,6 +12,7 @@ This project uses [uv](https://docs.astral.sh/uv/) for dependency and environmen
 
 1. Clone the project.
 2. Create a copy of [example.config.yaml](example.config.yaml) and rename it to `config.yaml`.
+   * `hf_token` is not required.
 3. Sychronise the project.
 ```bash
 uv sync
