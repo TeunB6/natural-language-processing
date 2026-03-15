@@ -2,18 +2,17 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 from transformers import DistilBertForSequenceClassification
+from src.const import HF_TOKEN
 
 
 class DistilBERTClassifer(nn.Module):
     """DistilBERT Classifer class."""
 
-    def __init__(
-        self, model_name: str = "distilbert-base-uncased", num_classes: int = 4
-    ) -> None:
+    def __init__(self, model_name: str = "distilbert-base-uncased") -> None:
         super(DistilBERTClassifer, self).__init__()
 
         self.model = DistilBertForSequenceClassification.from_pretrained(
-            model_name, num_labels=num_classes
+            model_name, num_labels=4, token=HF_TOKEN
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
