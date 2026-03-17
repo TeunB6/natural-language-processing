@@ -1,5 +1,5 @@
 from src.data.agnews2trans import AGNews2Trans, AGNews2TransDataset
-from src.const import DATA_DIR, LOGGER, DEVICE, RETRAIN_MODEL
+from src.const import LOGGER, DEVICE, RETRAIN_MODEL
 from src.utils.output import get_output_path
 from src.utils.ui import cli_menu
 from src.utils.data import get_available_vram

@@ -21,7 +21,7 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--assignment", type=int, choices=[1, 2], help="Assignment number"
+        "--assignment", type=int, choices=[1, 2, 3], help="Assignment number"
     )
     parser.add_argument(
         "--functionality",
