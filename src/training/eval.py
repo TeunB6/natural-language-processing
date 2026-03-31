@@ -2,6 +2,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from src.data.agnews import AGNews
 from src.data.agnews2vec import AGNewsWord2Vec
 from src.data.agnews2trans import AGNews2Trans
+from src.utils.data import TorchDataset
 from rich.table import Table
 from rich.panel import Panel
 from src.const import DEBUG, LOGGER, DEVICE
@@ -32,7 +33,15 @@ def evaluate_model(model: Any, ds: Any, use_test: bool = False, transform: Calla
         if isinstance(ds, AGNews):
             torch_ds = ds.get_torch_dataset(split_key, transform_fn=transform) if isinstance(ds, AGNews2Trans) else AGNewsWord2Vec(split_key)
             y = ds.y_test if use_test else ds.y_dev
-        model.eval()
+        if isinstance(ds, TorchDataset):
+            torch_ds = ds
+            # Check if labels have correct shape
+            if len(ds.y.shape) > 1 and ds.y.shape[1] > 1: # one-hot encoded
+                y = torch.argmax(ds.y, dim=1).cpu().numpy() + 1 # Convert to class indices (assuming classes are 1-indexed)
+            else:
+                y = ds.y.cpu().numpy()
+                
+            
 
         preds = []
 
@@ -74,7 +83,12 @@ def evaluate_model(model: Any, ds: Any, use_test: bool = False, transform: Calla
     cm = confusion_matrix(y, y_pred)
 
     # Make Confusion Matrix readable by mapping label indices to class names.
-    label_mapping = ds.label_mapping
+    
+    if hasattr(ds, "label_mapping"):
+        label_mapping = ds.label_mapping
+    else: # Use default mapping if not provided
+        label_mapping = {1: "World", 2: "Sports", 3: "Business", 4: "Sci/Tech"}
+        
     cm_table = Table(title="Confusion Matrix (with Class Names)")
 
     cm_table.add_column("Predicted \\ Actual", style="bold white")
