@@ -1,0 +1,192 @@
+% status: FINAL 2024-2025
+% v20240829
+
+\documentclass[12pt,a4paper,english]{article}
+
+%--- Styling preamble ---
+
+%% Essential
+
+\usepackage[T1]{fontenc} % essential for hyphenation and copy/pasting in the final pdf
+\usepackage{babel} % english-language support and hy-phen-a-tion. supports many languages. best practice is to set the language as an option to the \documentclass
+\usepackage{graphicx} % enhanced support for graphics
+\usepackage{amsmath} % essential additional math options
+\usepackage{xcolor} % for more color options, and colored text
+\usepackage{subcaption}
+
+\usepackage[style=ieee]{biblatex}
+\addbibresource{references.bib}
+
+%% Recommended packages
+
+\usepackage[margin=2.5cm]{geometry} % to set page margins
+\usepackage{comment} % To enable comment blocks that are not interpreted
+\usepackage{newtxtext,newtxmath} % changes fonts for better on-screen reading
+
+
+%% Essential in Physics Lab: Skills
+
+\usepackage{siunitx} % for appropriate value + unit + error formatting
+    \sisetup{separate-uncertainty} % write error out with ±
+\usepackage{titling} % for title page with abstract
+\usepackage[nottoc]{tocbibind} % bibliography in ToC
+
+\usepackage[hyperindex,colorlinks,linktoc=all]{hyperref} % for clickable links in pdf. essential feature for the TAs! should often be the last package (with the exceptions below)
+\usepackage{caption} % to point hyperref links to top of figure/table. put after hyperref
+\usepackage{bookmark} % to improve hyperref pdf bookmarks. put after hyperref
+\usepackage[nameinlink]{cleveref} % Better linking, e.g. to multiple figures and tables. Goes after hyperref
+    \urlstyle{same}
+    \hypersetup{ % hyperref/bookmark/cleveref package setup parameters
+            colorlinks=true,
+            linkcolor=purple,
+            filecolor=teal,
+            urlcolor=olive,
+            citecolor=teal,
+            bookmarksopen=true,
+            bookmarksopenlevel=0,
+            pdflang=en,
+            pdfpagemode=UseOutlines,
+            pdfstartview=FitB,
+            pdfpagelayout=OneColumn,
+            pdftitle={Experiment X Report},
+            pdfauthor={M. Doe, P.P. Recies},
+        }
+
+% Stuff for code & algorithms
+\usepackage{listings}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{xcolor}
+ 
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+\lstdefinestyle{python}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=python}
+
+\usepackage{algorithm}
+
+%% Packages not in this example, but that you might want to use:
+
+
+% General
+
+\usepackage{enumitem} % improve enumeration lists
+\usepackage{isodate} % for date formatting
+\usepackage{nameref} % to refer to section names themselves, not the number
+
+
+% Figure options
+
+\usepackage{subcaption} % sub-captions. put after package "caption"
+\usepackage{wrapfig}
+\usepackage{float}
+
+
+% Math
+
+\usepackage{bm} % for bold face in math environment (recommended by AMS style guide)
+\usepackage{mathtools} % for definition symbol :=
+
+% Options for Hyperref and related packages that were used in 2024 in the manuals
+
+\urlstyle{same}
+\hypersetup{ % bookmark/hyperref package setup parameters
+        colorlinks=true,
+        linkcolor=purple,
+        filecolor=teal,
+        urlcolor=olive,
+        citecolor=teal,
+        bookmarksopen=true,
+        bookmarksopenlevel=0,
+        pdflang=en,
+        pdfpagemode=UseOutlines,
+        pdfstartview=FitB,
+        pdfpagelayout=OneColumn,
+    }
+\hypersetup{ % PDF metadata
+    pdftitle={NLP Assignment 3},
+    pdfauthor={Teun Boersma and Marcus Persson},
+    }
+
+
+%--- End of styling preamble ---
+
+
+% General info for title page
+\title{
+    \vspace*{-2cm}
+    \includegraphics[width=\textwidth]{./img/rugr_fse_logoen_rood_cmyk.eps} \\[1.5cm]
+   \\ % insert title here
+    {\Large Natural Language Processing \\ }
+    {\large{Assignment 3}}
+}
+\author{Teun Boersma (S5195179) \&\\ Marcus Persson (S5195179)}
+\date{\today}
+
+
+% Let's go!
+\begin{document}
+
+% Title page
+\begin{titlingpage}   
+    \maketitle
+    
+\end{titlingpage}
+
+
+% Table of Contents (ToC)
+{   
+    \thispagestyle{empty} % no page number for ToC
+    \hypersetup{linkcolor=black} % black links for ToC aesthetics
+    \tableofcontents
+    \clearpage
+}
+
+\section{Dataset \& Setup}
+
+\section{Models}
+
+\section{Experimental Protocol}
+
+\section{Results}
+
+\section{Error Analysis}
+
+\section{Discussion}
+
+\newpage
+\printbibliography
+
+\suppressfloats[t]
+% Here be appendices!
+\newpage
+\appendix
+\section{AI-Use Statement}
+\section{Additional Plots}
+\label{ap:plots}
+
+
+\newpage
+\end{document}
