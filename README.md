@@ -2,10 +2,7 @@
 
 This project tackles 4-way news topic classification on the [AGNews](https://huggingface.co/datasets/sh0416/ag_news) on the classes World, Sports, Business, Sci/Tech. It contains the three deliverables required for Natural Language Processing (WBAI059-05).
 
-## Team
-* Teun Boersma (s5195179)
-* Julian Sprietsma (s5096219)
-* Marcus Harald Olof Persson (s5343798)
+The model card (from Assignment 3) can be found in this respository as well: [MODELCARD.md](MODELCARD.md)
 
 ## Developing
 This project uses [uv](https://docs.astral.sh/uv/) for dependency and environment management.
