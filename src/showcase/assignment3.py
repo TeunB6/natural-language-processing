@@ -19,7 +19,6 @@ class Assignment3Showcase:
 
     ds = AGNews2Trans()
 
-    # TODO: Implement robustness/slice evaluations.
     def __call__(self, choice: Optional[int] = None) -> None:
         """Call the showcase.
 
